@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tollywood Guess Night – Online</title>
+<meta property="og:title" content="Tollywood Guess Night 🎬">
+<meta property="og:description" content="Join my Telugu movie guessing game! Emoji, clues, dumb charades.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anek+Telugu:wght@400;600;800&family=Rozha+One&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<style>
+/* VOICE: loud single-screen cinema hall, festive party game
+   IDEA: printed cinema ticket + release-day banner
+   PICTURE: the live ticket card is the game; marigold garland edge
+   COLOUR and TYPE: maroon velvet, marigold, turmeric-cream ticket; Rozha One + Anek Telugu
+   LAYOUT: one column max 720px; ticket, actions, scoreboard chips */
+:root{color-scheme:light dark;--bg:light-dark(#6b1420,#2a070c);--bg2:light-dark(#4d0d16,#1b0408);--tk:light-dark(#fff3d6,#f6e3b8);--tkink:#2b0f0a;--gold:#f6a91b;--gold2:#ffcf5a;--ink:#fff3d6;--mut:light-dark(#f2cfa8,#d9b48c);--ok:#1f8a4c;--bad:#b3261e}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;min-height:100vh;background:radial-gradient(120% 60% at 50% 0,var(--bg),var(--bg2));color:var(--ink);font:16px/1.5 "Anek Telugu",system-ui,sans-serif;overflow-x:clip}
+.garland{height:22px;background:radial-gradient(circle at 11px 6px,var(--gold) 7px,transparent 8px) 0 0/22px 22px repeat-x,radial-gradient(circle at 11px 14px,#e8590c 5px,transparent 6px) 11px 0/22px 22px repeat-x}
+main{max-width:720px;margin:0 auto;padding:14px max(4vw,14px) 48px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+h1{font:400 clamp(30px,7vw,48px)/1.05 "Rozha One",serif;margin:8px 0 2px;color:var(--gold2);text-wrap:balance;text-shadow:0 3px 0 #0006}
+.pill{flex:none;margin-top:14px;font-size:13px;padding:4px 10px;border-radius:99px;background:#0004;white-space:nowrap}
+.pill.on::before{content:"● ";color:#5fd38d}.pill.off::before{content:"● ";color:#ff8a80}
+.sub{color:var(--mut);margin:0 0 16px}
+h2{font:400 26px/1.1 "Rozha One",serif;margin:0 0 10px;color:var(--tkink)}
+.ticket{position:relative;background:var(--tk);color:var(--tkink);border-radius:16px;padding:22px clamp(16px,4vw,28px);box-shadow:0 14px 30px #0007,inset 0 0 0 2px #e9c98a;margin-bottom:16px}
+.ticket::before,.ticket::after{content:"";position:absolute;top:50%;width:26px;height:26px;margin-top:-13px;border-radius:50%;background:var(--bg2)}
+.ticket::before{left:-13px}.ticket::after{right:-13px}
+.stub{border-top:2px dashed #c9a46a;margin:16px -6px 0;padding-top:14px}
+label.l{display:block;font-weight:600;font-size:14px;margin:14px 0 6px;color:#7a3b16}
+input[type=text]{font:inherit;font-size:16px;width:100%;padding:11px 12px;border:2px solid #d8b47a;border-radius:10px;background:#fffaf0;color:var(--tkink)}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #1d6fd8;outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row>input{flex:1 1 160px}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.chip{font:inherit;text-align:left;padding:12px;border-radius:12px;border:2px solid #d8b47a;background:#fffaf0;color:var(--tkink);cursor:pointer;min-height:44px}
+.chip b{display:block;font-size:17px}.chip span{font-size:13px;color:#7a4a2a}
+.chip[aria-pressed=true]{background:var(--gold);border-color:#a05a00}
+.seg{display:flex;flex-wrap:wrap;gap:6px}.seg .chip{padding:8px 14px;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:600 17px/1 "Anek Telugu",sans-serif;min-height:48px;padding:12px 18px;border-radius:12px;border:0;cursor:pointer;background:var(--gold);color:#2b0f0a;box-shadow:0 3px 0 #a05a00;text-decoration:none}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #a05a00}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:transparent;color:var(--tkink);box-shadow:inset 0 0 0 2px #c9a46a}
+.btn.ok{background:var(--ok);color:#fff;box-shadow:0 3px 0 #0e5a2f}
+.btn.wa{background:#25d366;color:#08311a;box-shadow:0 3px 0 #128c4a}
+.btn.wide{width:100%}
+.code{font:400 clamp(44px,14vw,72px)/1 "Rozha One",serif;letter-spacing:8px;text-align:center;color:#a05a00;margin:6px 0}
+.link{font-size:14px;word-break:break-all;background:#fff;border:1px dashed #c9a46a;border-radius:8px;padding:8px 10px;margin:8px 0}
+.meta{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:#7a3b16;font-weight:600}
+.big{font:400 clamp(28px,8vw,46px)/1.15 "Rozha One",serif;text-align:center;margin:14px 0;word-break:break-word}
+.emoji{font-size:clamp(44px,13vw,72px);letter-spacing:6px;line-height:1.2;text-align:center;margin:12px 0}
+.clues{list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.clues li{background:#fff;border:2px solid #ead1a0;border-radius:10px;padding:10px 12px}
+.clues li small{display:block;color:#9a5a2a;font-weight:600;font-size:13px}
+.clues li.locked{background:repeating-linear-gradient(45deg,#f3dfb6,#f3dfb6 8px,#ecd3a3 8px,#ecd3a3 16px);color:#9a7a55}
+.clues li.new{animation:pop .35s ease}
+@keyframes pop{from{transform:scale(.96);opacity:0}}
+.secs{font:400 30px/1 "Rozha One",serif;text-align:center;margin:6px 0}
+.ans{background:#2b0f0a;color:var(--gold2);border-radius:12px;padding:14px;text-align:center;font:400 28px/1.2 "Rozha One",serif;margin:10px 0}
+.ans small{display:block;font:14px "Anek Telugu",sans-serif;color:#f2cfa8;margin-top:4px}
+.hint{text-align:center;color:#7a3b16;margin:0}
+.mine{text-align:center;font-weight:600;margin:8px 0 0}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.sc{background:#0003;border:1px solid #ffffff2a;border-radius:12px;padding:8px 12px;position:relative}
+.sc.me{border-color:var(--gold2)}
+.sc b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sc span{font:400 26px/1 "Rozha One",serif}
+.sc i{position:absolute;top:8px;right:10px;font-style:normal;font-size:13px}
+.plist{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
+.plist li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1px solid #ead1a0;border-radius:10px;padding:8px 10px;min-height:44px}
+.x{font:700 18px/1 sans-serif;width:36px;height:36px;border-radius:8px;border:1px solid #d8b47a;background:#fffaf0;color:#7a3b16;cursor:pointer}
+.aw{display:grid;gap:8px;margin-top:10px}
+.awr{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #ead1a0;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;font:inherit;color:var(--tkink);min-height:52px;width:100%}
+.awr[aria-pressed=true]{background:#d9f5e3;border-color:var(--ok)}
+.awr .nm{font-weight:700;flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.awr .gs{flex:1;color:#6a4a2a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.awr .pt{flex:none;font-weight:800}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:#d9f5e3;color:#0e5a2f;flex:none}
+.tag.c{background:#fff0c2;color:#7a4a00}
+.toast{background:#0004;border-radius:12px;padding:8px 12px;margin-bottom:12px;font-size:15px}
+.note{font-size:13px;color:var(--mut);text-align:center;margin-top:18px}
+.podium{list-style:none;padding:0;margin:0}.podium li{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #c9a46a;font-size:18px}
+.podium li:first-child{font:400 28px/1.2 "Rozha One",serif;color:#a05a00}
+details{margin-top:12px}summary{cursor:pointer;font-weight:600;color:#7a3b16;min-height:32px}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){.clues li.new{animation:none}}
+</style>
+</head>
+<body>
+<div class="garland" aria-hidden="true"></div>
+<main>
+<div class="top"><h1>Tollywood Guess Night</h1><span class="pill off" id="net">Offline</span></div>
+<p class="sub">సినిమా పేరు చెప్పు! Online Telugu movie guessing. Everyone plays from their own phone.</p>
+<div id="toast" class="toast" hidden></div>
+<div id="app"></div>
+<section class="ticket" id="guessBox" hidden>
+ <form id="gf" class="row" autocomplete="off"><input type="text" id="gi" placeholder="Type the movie name" aria-label="Your guess" maxlength="60"><button class="btn ok" type="submit">Send</button></form>
+ <p class="mine" id="mine"></p>
+</section>
+<div id="hostBox"></div>
+<div class="board" id="board"></div>
+<p class="note" id="foot">Made for friends' game nights. Room traffic goes through a public relay, so don't type anything private.</p>
+</main>
+<script>
+{
+// [title, year, lead, director, music, plot hint, emoji]
+const M=[
+["Mayabazar",1957,"N. T. Rama Rao, A. Nageswara Rao & Savitri","K. V. Reddy","Ghantasala","Ghatotkacha uses magic to help Abhimanyu win his bride in this Mahabharata fantasy.","🪄🍲👑💍"],
+["Sankarabharanam",1980,"J. V. Somayajulu","K. Viswanath","K. V. Mahadevan","A proud Carnatic maestro shelters a courtesan's daughter as Western music takes over.","🎶🙏🎻🕉️"],
+["Swathi Muthyam",1986,"Kamal Haasan","K. Viswanath","Ilaiyaraaja","An innocent, childlike man marries a young widow and cares for her family.","😇💍👩‍👦"],
+["Geethanjali",1989,"Nagarjuna","Mani Ratnam","Ilaiyaraaja","Two people who each have little time left to live fall in love in Ooty.","💔🏔️⏳❤️"],
+["Shiva",1989,"Nagarjuna","Ram Gopal Varma","Ilaiyaraaja","A college student takes on a gangster who controls campus politics; a cycle chain becomes iconic.","🚲⛓️🎓👊"],
+["Jagadeka Veerudu Athiloka Sundari",1990,"Chiranjeevi & Sridevi","K. Raghavendra Rao","Ilaiyaraaja","A celestial princess loses her magic ring on Earth and a tourist guide finds it.","💍👸☁️🌍"],
+["Kshana Kshanam",1991,"Venkatesh & Sridevi","Ram Gopal Varma","M. M. Keeravani","A young woman and a petty thief run through the forest from robbers chasing stolen cash.","🏃‍♀️💰🌲⏱️"],
+["Gang Leader",1991,"Chiranjeevi","Vijaya Bapineedu","Bappi Lahiri","A jobless young man and his friends hunt down the gang that killed his brother.","👬🕺💥"],
+["Aditya 369",1991,"Nandamuri Balakrishna","Singeetham Srinivasa Rao","Ilaiyaraaja","A time machine sends a young man to the court of Sri Krishnadevaraya and into the future.","⏳🚀👑💎"],
+["Ninne Pelladata",1996,"Nagarjuna & Tabu","Krishna Vamsi","Sandeep Chowta","Two big families fall out when their children fall in love.","👨‍👩‍👧💍🎊"],
+["Annamayya",1997,"Nagarjuna","K. Raghavendra Rao","M. M. Keeravani","The life of the saint-poet who wrote thousands of songs for Lord Venkateswara.","🙏🎶📜🛕"],
+["Samarasimha Reddy",1999,"Nandamuri Balakrishna","B. Gopal","Mani Sharma","A man running a hotel in Hyderabad hides his past as a Rayalaseema faction leader.","🏨⚔️🌵👨"],
+["Manmadhudu",2002,"Nagarjuna","K. Vijaya Bhaskar","Devi Sri Prasad","An ad agency boss who distrusts women goes to Paris with his new assistant.","🙅‍♂️👩‍💼🗼"],
+["Indra",2002,"Chiranjeevi","B. Gopal","Mani Sharma","A taxi driver in Kashi was once a feared faction leader back home.","🚕🕉️🌵👑"],
+["Okkadu",2003,"Mahesh Babu","Gunasekhar","Mani Sharma","A kabaddi player rescues a girl from a faction leader and hides her in Hyderabad.","🤼🕌👧🏃"],
+["Simhadri",2003,"N. T. Rama Rao Jr.","S. S. Rajamouli","M. M. Keeravani","A kind man adopted by a Vizag family has a violent past in Kerala.","🦁🌴👊🏠"],
+["Tagore",2003,"Chiranjeevi","V. V. Vinayak","Mani Sharma","A professor secretly runs a student force that kidnaps corrupt officials.","👨‍🏫📋🚫💰"],
+["Arya",2004,"Allu Arjun","Sukumar","Devi Sri Prasad","A carefree boy proposes to a girl already loved by a politician's son.","💘😄🙋‍♂️"],
+["Sye",2004,"Nithiin","S. S. Rajamouli","M. M. Keeravani","Rival college gangs must unite in a rugby match to save their ground from a goon.","🏉🎓🤝"],
+["Shankar Dada M.B.B.S.",2004,"Chiranjeevi","Jayanth C. Paranjee","Devi Sri Prasad","A kind-hearted goon fakes his way into medical college to please his parents.","🩺😎🏥"],
+["Athadu",2005,"Mahesh Babu","Trivikram Srinivas","Mani Sharma","A hitman framed for a murder takes a dead man's place in a village family.","🎯🏡🕶️🔄"],
+["Chatrapathi",2005,"Prabhas","S. S. Rajamouli","M. M. Keeravani","A refugee boy separated from his mother grows into the protector of Vizag's coast.","🌊👩‍👦💪"],
+["Nuvvostanante Nenoddantana",2005,"Siddharth & Trisha","Prabhu Deva","Devi Sri Prasad","A rich city boy works on a village farm to win his girlfriend's brother over.","🌾🐄💑"],
+["Pokiri",2006,"Mahesh Babu","Puri Jagannadh","Mani Sharma","A hired gun with an attitude turns out to be someone else entirely.","🔫😎👮"],
+["Bommarillu",2006,"Siddharth & Genelia","Bhaskar","Devi Sri Prasad","A son whose father decides everything for him brings home a bubbly girl.","👨‍👦🏠🎈"],
+["Happy Days",2007,"Varun Sandesh, Tamannaah & others","Sekhar Kammula","Mickey J. Meyer","Eight friends live through four years of engineering college.","🎓🚴📚❤️"],
+["Yamadonga",2007,"N. T. Rama Rao Jr.","S. S. Rajamouli","M. M. Keeravani","A thief ends up in the god of death's world and outwits him.","😈📿🔥🐃"],
+["Jalsa",2008,"Pawan Kalyan","Trivikram Srinivas","Devi Sri Prasad","A former Naxalite turned happy-go-lucky guy falls for a police officer's daughter.","🎉🌲👮‍♂️"],
+["Magadheera",2009,"Ram Charan","S. S. Rajamouli","M. M. Keeravani","A bike racer finds he's the reborn warrior of a love story from 400 years ago.","🐎⚔️🔁🏍️"],
+["Ye Maaya Chesave",2010,"Naga Chaitanya & Samantha","Gautham Vasudev Menon","A. R. Rahman","An aspiring filmmaker loves an older Malayali Christian girl living upstairs.","🎬💌🏠"],
+["Darling",2010,"Prabhas","A. Karunakaran","G. V. Prakash Kumar","At a family reunion, a guy tells a made-up love story to dodge a match.","🗣️💑👨‍👩‍👧‍👦"],
+["Khaleja",2010,"Mahesh Babu","Trivikram Srinivas","Mani Sharma","A Hyderabad cab driver is taken for a god by a desert village in trouble.","🚕🏜️🙏"],
+["Dookudu",2011,"Mahesh Babu","Srinu Vaitla","S. Thaman","A cop stages a fake reality show so his father believes he's still an MLA.","👮📺🏛️😂"],
+["Eega",2012,"Nani, Samantha & Sudeep","S. S. Rajamouli","M. M. Keeravani","A murdered man is reborn as a housefly and takes revenge on his killer.","🪰😡💔"],
+["Gabbar Singh",2012,"Pawan Kalyan","Harish Shankar","Devi Sri Prasad","A swaggering cop takes on a local goon in a remake of Dabangg.","👮🕶️🤠"],
+["Seethamma Vakitlo Sirimalle Chettu",2013,"Venkatesh & Mahesh Babu","Srikanth Addala","Mickey J. Meyer","Two brothers in a close-knit village family struggle to find work and love.","👬🌳🏡"],
+["Mirchi",2013,"Prabhas","Koratala Siva","Devi Sri Prasad","A man tries to end a bloody feud between his family and a rival clan.","🌶️⚔️🤝"],
+["Attarintiki Daredi",2013,"Pawan Kalyan","Trivikram Srinivas","Devi Sri Prasad","A rich grandson becomes a driver in his aunt's house to bring her back home.","👵🚗✈️🏠"],
+["Manam",2014,"A. Nageswara Rao, Nagarjuna & Naga Chaitanya","Vikram Kumar","Anup Rubens","Three generations of one family meet their reborn loved ones.","🔁👴👨👦"],
+["Temper",2015,"N. T. Rama Rao Jr.","Puri Jagannadh","Anup Rubens","A corrupt cop who works for a gangster has a change of heart.","👮💰🔄⚖️"],
+["Baahubali: The Beginning",2015,"Prabhas","S. S. Rajamouli","M. M. Keeravani","A boy climbs a giant waterfall and learns he's heir to Mahishmati.","🏔️💧👑⚔️"],
+["Srimanthudu",2015,"Mahesh Babu","Koratala Siva","Devi Sri Prasad","A billionaire's son adopts his father's ancestral village.","🏡💰🚴"],
+["Pelli Choopulu",2016,"Vijay Deverakonda & Ritu Varma","Tharun Bhascker","Vivek Sagar","A lazy chef and an ambitious girl meet for an arranged match and start a food truck.","🚚🍔💍"],
+["Janatha Garage",2016,"N. T. Rama Rao Jr. & Mohanlal","Koratala Siva","Devi Sri Prasad","A Mumbai environmental student inherits a Hyderabad mechanic shop that fights for people.","🔧🌿🏭"],
+["Baahubali 2: The Conclusion",2017,"Prabhas","S. S. Rajamouli","M. M. Keeravani","Answers why Kattappa killed the hero.","🗡️❓👑🔥"],
+["Arjun Reddy",2017,"Vijay Deverakonda","Sandeep Reddy Vanga","Radhan","A gifted surgeon spirals into self-destruction after losing the love of his life.","🩺🍺💔🏍️"],
+["Fidaa",2017,"Varun Tej & Sai Pallavi","Sekhar Kammula","Shakthikanth Karthick","A US-based doctor falls for a feisty girl from Banswada.","🇺🇸🌾💃"],
+["Rangasthalam",2018,"Ram Charan & Samantha","Sukumar","Devi Sri Prasad","A partly deaf villager in the 1980s takes on a decades-old village president.","👂🌾🗳️"],
+["Mahanati",2018,"Keerthy Suresh","Nag Ashwin","Mickey J. Meyer","The rise and fall of the legendary actress Savitri.","🎬👸🌟"],
+["Geetha Govindam",2018,"Vijay Deverakonda & Rashmika Mandanna","Parasuram","Gopi Sundar","A lecturer tries to undo one bad first impression on a bus.","🚌😳💍"],
+["Ee Nagaraniki Emaindi",2018,"Vishwak Sen & friends","Tharun Bhascker","Vivek Sagar","Four friends take a boozy trip to Goa and try to shoot a short film.","👬🍻🏖️🎥"],
+["Bharat Ane Nenu",2018,"Mahesh Babu","Koratala Siva","Devi Sri Prasad","A young Oxford graduate suddenly becomes Chief Minister.","🎓🏛️🗳️"],
+["Jersey",2019,"Nani","Gowtam Tinnanuri","Anirudh Ravichander","A failed cricketer returns to the game at 36 to buy his son a gift.","🏏👕👦"],
+["Agent Sai Srinivasa Athreya",2019,"Naveen Polishetty","Swaroop RSJ","Mark K. Robin","A small-town detective in Nellore stumbles onto a big case.","🕵️🔍⚰️"],
+["Majili",2019,"Naga Chaitanya & Samantha","Shiva Nirvana","Gopi Sundar","A failed cricketer in Vizag can't let go of his first love; his wife waits.","🏏💔🍺"],
+["Ala Vaikunthapurramuloo",2020,"Allu Arjun","Trivikram Srinivas","S. Thaman","Two babies swapped at birth; the middle-class one grows up and finds out.","👶🔄🏰"],
+["Sarileru Neekevvaru",2020,"Mahesh Babu","Anil Ravipudi","Devi Sri Prasad","An army major delivers news to a fallen soldier's family in Kurnool.","🪖🚂🏠"],
+["Jathi Ratnalu",2021,"Naveen Polishetty","Anudeep K. V.","Radhan","Three jobless friends from Jogipet get framed in Hyderabad.","🤪👬👬⚖️"],
+["Uppena",2021,"Panja Vaisshnav Tej & Krithi Shetty","Buchi Babu Sana","Devi Sri Prasad","A fisherman's son loves a rich girl whose father values honour above all.","🌊🎣💔"],
+["Akhanda",2021,"Nandamuri Balakrishna","Boyapati Srinu","S. Thaman","An aghora twin rises to protect his brother and a temple.","🔱🕉️👬"],
+["Pushpa: The Rise",2021,"Allu Arjun","Sukumar","Devi Sri Prasad","A coolie rises in the red sandalwood smuggling trade.","🌲🔴🪓😤"],
+["RRR",2022,"N. T. Rama Rao Jr. & Ram Charan","S. S. Rajamouli","M. M. Keeravani","Two revolutionaries in 1920s India become friends, then find themselves on opposite sides.","🔥💧🤝🐅"],
+["Sita Ramam",2022,"Dulquer Salmaan & Mrunal Thakur","Hanu Raghavapudi","Vishal Chandrasekhar","A soldier in Kashmir gets love letters from someone signing only as wife.","✉️🪖❄️"],
+["Karthikeya 2",2022,"Nikhil Siddhartha","Chandoo Mondeti","Kaala Bhairava","A doctor goes looking for Lord Krishna's anklet.","🦶🔍🐚🌊"],
+["Balagam",2023,"Priyadarshi","Venu Yeldandi","Bheems Ceciroleo","After a grandfather's death, a crow won't touch the offering until the family makes up.","🐦‍⬛🍚👴"],
+["Dasara",2023,"Nani & Keerthy Suresh","Srikanth Odela","Santhosh Narayanan","Friends in a coal-mining village get pulled into a bar's politics.","⛏️🍺🎉"],
+["Salaar: Part 1 – Ceasefire",2023,"Prabhas","Prashanth Neel","Ravi Basrur","A man returns to Khansaar to stand by his childhood friend.","🛡️🤝🔥"],
+["HanuMan",2024,"Teja Sajja","Prasanth Varma",null,"A petty thief in Anjanadri gains superpowers from a gem.","🐒💎⚡"],
+["Kalki 2898 AD",2024,"Prabhas & Amitabh Bachchan","Nag Ashwin","Santhosh Narayanan","In a future Kasi, a bounty hunter protects a woman carrying a prophesied child.","🚀🏹🤰🌆"],
+["Lucky Baskhar",2024,"Dulquer Salmaan","Venky Atluri","G. V. Prakash Kumar","A bank cashier in 1990s Bombay gets rich by gaming the system.","🏦💵📈"],
+["Devara: Part 1",2024,"N. T. Rama Rao Jr.","Koratala Siva","Anirudh Ravichander","A coastal leader turns his people against smuggling by sea.","🌊⚓🗡️"],
+["Pushpa 2: The Rule",2024,"Allu Arjun","Sukumar","Devi Sri Prasad","The smuggler from the first film now runs the syndicate and goes global.","🌲🔴👑🌍"]
+].map(([t,y,l,d,m,p,e])=>({t,y,l,d,m,p,e}));
+const BROKERS=["wss://broker.hivemq.com:8884/mqtt","wss://broker.emqx.io:8084/mqtt","wss://test.mosquitto.org:8081"];
+const MODES={
+ ladder:{n:"Clue Ladder",s:"5 clues, hardest first. Guess early for up to 5 points.",tm:0},
+ emoji:{n:"Emoji Rush",s:"Everyone sees the emojis. 30 seconds. 2 points, 1 after a hint.",tm:30},
+ vowel:{n:"Vowel Vanish",s:"Title with the vowels removed. 30 seconds. 2 points, 1 after a hint.",tm:30},
+ charades:{n:"Dumb Charades",s:"One player acts on video call, only they see the title. 90 seconds.",tm:90}
+};
+const ERAS={all:["All eras",0,9999],classic:["Before 2000",0,1999],mid:["2000–2014",2000,2014],new:["2015 onwards",2015,9999]};
+const $=id=>document.getElementById(id);
+const app=$('app'),boardEl=$('board'),hostBox=$('hostBox'),guessBox=$('guessBox');
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const words=t=>t.split(/\s+/).length;
+const novowel=t=>t.toUpperCase().replace(/[AEIOU]/g,"").replace(/[.:–]/g,"").replace(/\s+/g," ").trim();
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const rid=n=>Array.from({length:n},()=>"abcdefghjkmnpqrstuvwxyz23456789"[Math.random()*31|0]).join('');
+const me={id:ls.get("tgn_id")||rid(10),name:ls.get("tgn_name","")};ls.set("tgn_id",me.id);
+let fanfare=false,cli=null,base="",role=null,code="",bi=0,V=null,H=null,endLocal=0,lastRound=-1,lastClue=0,myGuess="",ac=null;
+
+// ---------- fuzzy check ----------
+const norm=s=>String(s).toLowerCase().normalize("NFKD").replace(/[^a-z0-9]/g,"").replace(/aa/g,"a").replace(/ee/g,"i").replace(/oo/g,"u").replace(/th/g,"t").replace(/(.)\1+/g,"$1");
+function lev(a,b){const d=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return d[b.length]}
+function check(guess,title){const raw=s=>String(s).toLowerCase().replace(/[^a-z0-9]/g,"");if(raw(guess)===raw(title))return"yes";const g=norm(guess);if(raw(guess).length<3)return"";const full=norm(title),main=norm(title.split(/[:–]/)[0]);
+ for(const t of[full,main]){if(g===t)return t===full?"yes":"close";if(lev(g,t)<=Math.max(1,Math.floor(t.length/6)))return t===full?"yes":"close"}
+ return full.includes(g)&&g.length>=4?"close":""}
+
+// ---------- sound ----------
+function beep(f=660,d=.15){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+function toast(msg){const t=$('toast');t.innerHTML=msg;t.hidden=!msg}
+
+// ---------- network ----------
+function netPill(on){const n=$('net');n.className="pill "+(on?"on":"off");n.textContent=on?"Live":"Reconnecting…"}
+function connect(i){return new Promise((res,rej)=>{if(!window.mqtt)return rej(new Error("lib"));
+ const c=mqtt.connect(BROKERS[i],{clientId:"tgn_"+rid(12),clean:true,connectTimeout:7000,reconnectPeriod:2500,keepalive:30});
+ const to=setTimeout(()=>{c.end(true);rej(new Error("timeout"))},8000);
+ c.once("connect",()=>{clearTimeout(to);res(c)});
+ c.on("connect",()=>netPill(true));c.on("offline",()=>netPill(false));c.on("reconnect",()=>netPill(false))})}
+async function connectAny(pref){const order=pref==null?[0,1,2]:[pref];for(const i of order){try{const c=await connect(i);return[c,i]}catch(e){}}throw new Error("none")}
+function pub(t,obj,retain){if(cli)cli.publish(base+t,obj==null?"":JSON.stringify(obj),{qos:1,retain:!!retain})}
+function parse(p){try{const s=p.toString();return s?JSON.parse(s):null}catch(e){return null}}
+const shareURL=()=>location.href.split("#")[0]+"#"+code+"-"+bi;
+
+// ---------- home ----------
+function home(err){role=null;hostBox.innerHTML="";guessBox.hidden=true;boardEl.innerHTML="";
+ const h=(location.hash||"").slice(1).toUpperCase().match(/^([A-Z0-9]{5})(?:-(\d))?$/);
+ app.innerHTML=`<section class="ticket">${err?`<p style="color:var(--bad);font-weight:600;margin-top:0">${esc(err)}</p>`:""}
+ <h2>${h?"You're invited to room "+h[1]:"Start or join a game"}</h2>
+ <label class="l" for="nm">Your name</label><input type="text" id="nm" maxlength="16" value="${esc(me.name)}" placeholder="e.g. Vivek">
+ ${h?"":`<label class="l" for="cd">Room code</label><input type="text" id="cd" maxlength="5" placeholder="5 letters from your host" style="text-transform:uppercase">`}
+ <div class="stub row"><button class="btn" id="join">${h?"Join game":"Join with code"}</button>${h?"":`<button class="btn ghost" id="host">Create a new game</button>`}</div></section>`;
+ const nm=$('nm');nm.focus();
+ const name=()=>{const v=nm.value.trim().slice(0,16);if(!v){nm.focus();nm.style.borderColor="var(--bad)";return null}me.name=v;ls.set("tgn_name",v);return v};
+ $('join').onclick=()=>{if(!name())return;const c=h?h[1]:$('cd').value.trim().toUpperCase();if(!/^[A-Z0-9]{5}$/.test(c))return $('cd').focus();joinGame(c,h&&h[2]!=null?+h[2]:null)};
+ const hb=$('host');if(hb)hb.onclick=()=>{if(name())hostGame()};}
+
+// ---------- player ----------
+async function joinGame(c,pref){app.innerHTML=`<section class="ticket"><div class="big">Connecting…</div></section>`;
+ const saved=ls.get("tgn_host_"+c);if(saved){return hostGame(saved)}
+ let r;try{r=await connectAny(pref)}catch(e){return home("Couldn't reach the game server. Check your internet and try again.")}
+ [cli,bi]=r;code=c;base="tgn/v2/"+code;role="player";location.hash=code+"-"+bi;
+ cli.on("message",(t,p)=>{const d=parse(p);if(t===base+"/s"){if(d)onState(d)}else if(t===base+"/x/"+me.id){secret=d;render()}});
+ cli.subscribe([base+"/s",base+"/x/"+me.id],{qos:1});
+ pub("/p/"+me.id,{name:me.name},true);
+ V=null;render()}
+let secret=null;
+function sendGuess(text){if(!V||V.phase!=="clue"||V.locked)return;myGuess=text;
+ if(role==="host")hostGuess(me.id,text);else pub("/g/"+me.id,{text,round:V.round});
+ $('mine').textContent="Your answer: "+text;beep(700,.06)}
+$('gf').addEventListener('submit',e=>{e.preventDefault();const v=$('gi').value.trim().slice(0,60);if(!v)return;sendGuess(v);$('gi').value=""});
+
+function onState(s){const newRound=s.round!==lastRound;
+ if(newRound){myGuess="";$('mine').textContent="";lastClue=0;if(s.phase==="clue")beep(523,.1)}
+ if(s.phase==="reveal"&&V&&V.phase!=="reveal")beep(784,.2);
+ if(s.left!=null)endLocal=Date.now()+s.left*1000;else endLocal=0;
+ if(s.phase!=="end")fanfare=false;V=s;lastRound=s.round;render()}
+
+// ---------- shared render ----------
+function render(){if(!role)return;board();
+ const v=V;
+ if(!v){app.innerHTML=`<section class="ticket"><div class="big">Waiting for the host…</div><p class="hint">Room ${esc(code)}. If this takes long, ask the host to open their game.</p></section>`;guessBox.hidden=true;hostPanel();return}
+ const isActor=v.mode==="charades"&&v.actor===me.id;
+ toast(v.lastAward&&v.phase==="clue"?"Last film: "+v.lastAward.map(a=>`<b>${esc(a.name)}</b> +${a.pts}`).join(", "):"");
+ if(v.phase==="lobby"){const inIt=v.players.some(p=>p.id===me.id);
+  app.innerHTML=role==="host"?"":`<section class="ticket"><h2>${inIt?"You're in! 🎟️":"Joining…"}</h2><p class="hint" style="text-align:left">Waiting for the host to start. ${v.players.length} player${v.players.length===1?"":"s"} here.</p>
+  <ul class="plist">${v.players.map(p=>`<li><span>${esc(p.name)}${p.id===me.id?" (you)":""}</span></li>`).join('')}</ul></section>`;
+  guessBox.hidden=true;hostPanel();return}
+ if(v.phase==="end"){const r=v.players.slice().sort((a,b)=>b.score-a.score);const tie=r.length>1&&r[0].score===r[1].score;
+  app.innerHTML=`<section class="ticket"><div class="meta"><span>Final scores</span><span>${esc(MODES[v.mode].n)}</span></div><div class="big">${tie?"It's a tie! 🤝":"🏆 "+esc(r[0]?.name)+" wins!"}</div><ol class="podium">${r.map(p=>`<li><span>${esc(p.name)}</span><span>${p.score}</span></li>`).join('')}</ol>${role==="host"?"":`<p class="hint" style="margin-top:12px">The host can start another round.</p>`}</section>`;
+  if(!fanfare){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.15),i*140));fanfare=true}
+  guessBox.hidden=true;hostPanel();return}
+ const sh=v.show||{},m=MODES[v.mode];let body="";
+ if(v.mode==="ladder"){const labels=["Story","Year & music","Emoji","Director","Lead cast"];
+  body=`<ul class="clues">${labels.map((l,i)=>i<sh.clues.length?`<li class="${i>=lastClue?"new":""}"><small>${l}</small>${i===2?`<span style="font-size:30px">${esc(sh.clues[i])}</span>`:esc(sh.clues[i])}</li>`:`<li class="locked"><small>Clue ${i+1}</small>Locked</li>`).join('')}</ul>`;lastClue=sh.clues.length}
+ else if(v.mode==="emoji")body=`<div class="emoji">${esc(sh.e)}</div>`;
+ else if(v.mode==="vowel")body=`<div class="big" style="letter-spacing:3px">${esc(sh.nv)}</div>`;
+ else{const actor=v.players.find(p=>p.id===v.actor);
+  body=isActor&&secret&&secret.round===v.round&&v.phase==="clue"?`<p class="hint">You're acting! Only you can see this. No talking 🤐</p><div class="ans">${esc(secret.t)}<small>${secret.words} word${secret.words>1?"s":""} · ${secret.y}</small></div>`:`<div class="big">🎭 ${esc(actor?actor.name:"Someone")} is acting</div><p class="hint">Watch them on the video call and type your guess.</p>`}
+ const info=v.mode==="ladder"||isActor?"":`<p class="hint">${sh.words} word${sh.words>1?"s":""}${sh.hint?" · "+esc(sh.hint):""}</p>`;
+ const pts=v.mode==="ladder"?`Worth ${6-sh.clues.length}`:v.mode==="charades"?"Worth 1":`Worth ${sh.hint?1:2}`;
+ const timer=v.phase==="clue"&&endLocal?`<div class="secs" id="tn"></div>`:v.locked&&v.phase==="clue"?`<div class="secs">Time's up!</div>`:"";
+ const ans=v.phase==="reveal"&&v.answer?`<div class="ans">${esc(v.answer.t)}<small>${v.answer.y} · ${esc(v.answer.l)} · dir. ${esc(v.answer.d)}</small></div>`:"";
+ const status=v.phase==="reveal"?(role==="host"?"":`<p class="hint">${myGuess?"You said: <b>"+esc(myGuess)+"</b>. ":""}Host is picking who scored…</p>`):`<p class="hint" style="margin-top:8px">${v.guessed.length} of ${v.players.length-(v.mode==="charades"?1:0)} answered</p>`;
+ app.innerHTML=`<section class="ticket"><div class="meta"><span>${esc(m.n)} · Film ${v.round}/${v.total}</span><span>${v.phase==="reveal"?"Answer":pts}</span></div>${body}${info}${timer}${ans}${status}</section>`;
+ guessBox.hidden=!(v.phase==="clue"&&!v.locked&&!isActor);
+ if(guessBox.hidden===false&&myGuess)$('mine').textContent="Your answer: "+myGuess+" (send again to change)";
+ tickT();hostPanel()}
+function board(){const v=V;if(!v||v.phase==="lobby"){boardEl.innerHTML="";return}
+ boardEl.innerHTML=v.players.slice().sort((a,b)=>b.score-a.score).map(p=>`<div class="sc${p.id===me.id?" me":""}"><b>${esc(p.name)}${p.id===me.id?" (you)":""}</b><span>${p.score}</span>${v.phase==="clue"&&v.guessed.includes(p.id)?"<i>✓</i>":v.mode==="charades"&&v.actor===p.id?"<i>🎭</i>":""}</div>`).join('')}
+function tickT(){const n=$('tn');if(!n||!endLocal)return;const l=Math.max(0,Math.ceil((endLocal-Date.now())/1000));n.textContent=l+"s";if(l<=5&&l>0&&n.dataset.l!=l){n.dataset.l=l;beep(880,.06)}}
+setInterval(tickT,250);
+
+// ---------- host ----------
+async function hostGame(saved){app.innerHTML=`<section class="ticket"><div class="big">Opening your room…</div></section>`;
+ let r;try{r=await connectAny(saved?saved.bi:null)}catch(e){return home("Couldn't reach the game server. Check your internet and try again.")}
+ [cli,bi]=r;role="host";
+ H=saved||{code:rid(5).toUpperCase(),mode:"ladder",era:"all",films:10,phase:"lobby",players:{},order:[],round:0,total:0,deck:[],cur:-1,clue:1,hint:false,locked:false,endAt:0,actor:null,guesses:{},sel:{},lastAward:null};
+ H.bi=bi;code=H.code;base="tgn/v2/"+code;location.hash=code+"-"+bi;
+ addPlayer(me.id,me.name);
+ cli.on("message",(t,p)=>{const d=parse(p),k=t.slice(base.length);
+  if(k.startsWith("/p/")){const id=k.slice(3);if(d&&d.name)addPlayer(id,String(d.name).slice(0,16));}
+  else if(k.startsWith("/g/")){const id=k.slice(3);if(d&&d.round===H.round)hostGuess(id,String(d.text||"").slice(0,60))}});
+ cli.subscribe([base+"/p/+",base+"/g/+"],{qos:1});
+ publish()}
+function addPlayer(id,name){const ex=H.players[id];if(ex&&ex.name===name)return;H.players[id]={name,score:ex?ex.score:0};if(!H.order.includes(id))H.order.push(id);publish()}
+function hostGuess(id,text){if(H.phase!=="clue"||H.locked||!H.players[id]||(H.mode==="charades"&&id===H.actor)||!text)return;
+ H.guesses[id]={text,clue:H.clue,hint:H.hint};publish()}
+const movie=()=>M[H.cur];
+function pts(id){const g=H.guesses[id];if(H.mode==="ladder")return g?Math.max(1,6-g.clue):1;if(H.mode==="charades")return 1;return g&&g.hint?1:2}
+function publish(){if(!H)return;ls.set("tgn_host_"+H.code,H);
+ const m=H.cur>=0?movie():null,players=H.order.filter(id=>H.players[id]).map(id=>({id,name:H.players[id].name,score:H.players[id].score}));
+ let show=null;
+ if(m){if(H.mode==="ladder"){const c=[m.p,m.y+(m.m?" · music by "+m.m:""),m.e,m.d,m.l];show={clues:c.slice(0,H.clue)}}
+  else{show={words:words(m.t),hint:H.hint?m.y+" · "+m.l:""};if(H.mode==="emoji")show.e=m.e;if(H.mode==="vowel")show.nv=novowel(m.t)}}
+ const s={v:2,phase:H.phase,mode:H.mode,round:H.round,total:H.total,players,show,locked:H.locked,actor:H.actor,
+  left:H.phase==="clue"&&H.endAt&&!H.locked?Math.max(0,Math.round((H.endAt-Date.now())/1000)):null,
+  guessed:Object.keys(H.guesses),answer:H.phase==="reveal"&&m?{t:m.t,y:m.y,l:m.l,d:m.d}:null,lastAward:H.lastAward};
+ pub("/s",s,true);onState(s)}
+setInterval(()=>{if(H&&H.phase==="clue"&&H.endAt&&!H.locked&&Date.now()>=H.endAt){H.locked=true;beep(220,.5);publish()}},500);
+function startGame(){const[,a,b]=ERAS[H.era];
+ const pool=M.map((m,i)=>i).filter(i=>M[i].y>=a&&M[i].y<=b&&(H.mode!=="vowel"||novowel(M[i].t)!==M[i].t.toUpperCase()));
+ H.deck=shuf(pool);H.total=Math.min(H.films,pool.length);H.round=0;H.lastAward=null;
+ for(const id in H.players)H.players[id].score=0;nextFilm()}
+function nextFilm(){if(H.round>=H.total){H.phase="end";H.cur=-1;return publish()}
+ H.round++;H.cur=H.deck.pop();H.clue=1;H.hint=false;H.locked=false;H.guesses={};H.sel={};H.phase="clue";
+ const tm=MODES[H.mode].tm;H.endAt=tm?Date.now()+tm*1000:0;
+ if(H.mode==="charades"){const ids=H.order.filter(id=>H.players[id]);H.actor=ids[(H.round-1)%ids.length];const m=movie();
+  pub("/x/"+H.actor,{round:H.round,t:m.t,y:m.y,words:words(m.t)},true);if(H.actor===me.id)secret={round:H.round,t:m.t,y:m.y,words:words(m.t)}}
+ else H.actor=null;
+ publish()}
+function reveal(){H.phase="reveal";H.locked=true;H.sel={};const m=movie();
+ for(const id in H.guesses)if(check(H.guesses[id].text,m.t)==="yes")H.sel[id]=true;publish()}
+function award(){const out=[];for(const id in H.sel)if(H.sel[id]&&H.players[id]){const p=pts(id);H.players[id].score+=p;out.push({name:H.players[id].name,pts:p})}
+ if(H.mode==="charades"&&out.length&&H.players[H.actor]&&!H.sel[H.actor]){H.players[H.actor].score+=1;out.push({name:H.players[H.actor].name+" (acting)",pts:1})}
+ H.lastAward=out.length?out:null;if(H.mode==="charades")pub("/x/"+H.actor,null,true);nextFilm()}
+
+function hostPanel(){if(role!=="host"||!H){hostBox.innerHTML="";return}
+ if(H.phase==="lobby"){const url=shareURL(),msg=`🎬 Join my Tollywood Guess Night! Room ${code}\n${url}`;
+  app.innerHTML=`<section class="ticket"><h2>Your room is live</h2><div class="code">${esc(code)}</div>
+  <div class="link" id="lk">${esc(url)}</div>
+  <div class="row"><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Share on WhatsApp</a><button class="btn ghost" id="cp">Copy link</button></div>
+  <label class="l">Players (${H.order.filter(id=>H.players[id]).length})</label>
+  <ul class="plist">${H.order.filter(id=>H.players[id]).map(id=>`<li><span>${esc(H.players[id].name)}${id===me.id?" (you, host)":""}</span>${id===me.id?"":`<button class="x" data-k="${esc(id)}" aria-label="Remove">×</button>`}</li>`).join('')}</ul>
+  <label class="l">Game</label><div class="chips">${Object.entries(MODES).map(([k,m])=>`<button class="chip" data-mode="${k}" aria-pressed="${H.mode===k}"><b>${m.n}</b><span>${m.s}</span></button>`).join('')}</div>
+  <label class="l">Films from</label><div class="seg">${Object.entries(ERAS).map(([k,e])=>`<button class="chip" data-era="${k}" aria-pressed="${H.era===k}">${e[0]}</button>`).join('')}</div>
+  <label class="l">Number of films</label><div class="seg">${[5,10,15,20].map(n=>`<button class="chip" data-f="${n}" aria-pressed="${H.films===n}">${n}</button>`).join('')}</div>
+  <div class="stub"><button class="btn wide" id="go">Start the show 🎬</button><p class="hint" style="margin-top:8px;font-size:14px">${H.mode==="charades"?"Get everyone on a WhatsApp video call for charades.":"Players can join any time, even mid-game."}</p></div></section>`;
+  hostBox.innerHTML="";
+  $('cp').onclick=async()=>{try{await navigator.clipboard.writeText(url);$('cp').textContent="Copied ✓"}catch(e){const r=document.createRange();r.selectNodeContents($('lk'));getSelection().removeAllRanges();getSelection().addRange(r);$('cp').textContent="Selected, copy it"}};
+  app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const id=b.dataset.k;delete H.players[id];H.order=H.order.filter(x=>x!==id);pub("/p/"+id,null,true);publish()});
+  app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{H.mode=b.dataset.mode;publish()});
+  app.querySelectorAll('[data-era]').forEach(b=>b.onclick=()=>{H.era=b.dataset.era;publish()});
+  app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{H.films=+b.dataset.f;publish()});
+  $('go').onclick=startGame;return}
+ if(H.phase==="end"){hostBox.innerHTML=`<section class="ticket"><div class="row"><button class="btn" id="again">Play again</button><button class="btn ghost" id="lob">Back to lobby</button></div></section>`;
+  $('again').onclick=startGame;$('lob').onclick=()=>{H.phase="lobby";H.lastAward=null;publish()};return}
+ const ids=H.order.filter(id=>H.players[id]),m=movie();
+ if(H.phase==="clue"){const n=Object.keys(H.guesses).length;
+  hostBox.innerHTML=`<section class="ticket"><h2>Host controls</h2><div class="row">
+  ${H.mode==="ladder"&&H.clue<5?`<button class="btn" id="more">Next clue</button>`:""}
+  ${(H.mode==="emoji"||H.mode==="vowel")&&!H.hint?`<button class="btn ghost" id="hi">Give hint</button>`:""}
+  <button class="btn ok" id="rv">Show answer</button></div>
+  <details><summary>Peek at answers so far (${n})</summary><ul class="plist">${ids.filter(id=>H.guesses[id]&&id!==me.id).map(id=>`<li><span><b>${esc(H.players[id].name)}</b>: ${esc(H.guesses[id].text)}</span></li>`).join('')||"<li>None yet</li>"}</ul></details>
+  <div class="row" style="margin-top:12px"><button class="btn ghost" id="end">End game</button></div></section>`;
+  const mo=$('more');if(mo)mo.onclick=()=>{H.clue++;publish()};
+  const hi=$('hi');if(hi)hi.onclick=()=>{H.hint=true;publish()};
+  $('rv').onclick=reveal;$('end').onclick=()=>{H.phase="end";publish()};return}
+ // reveal: pick who scored
+ const rows=ids.filter(id=>!(H.mode==="charades"&&id===H.actor)).map(id=>{const g=H.guesses[id],c=g?check(g.text,m.t):"";
+  return `<button class="awr" data-s="${esc(id)}" aria-pressed="${!!H.sel[id]}"><span class="nm">${esc(H.players[id].name)}</span><span class="gs">${g?esc(g.text):"—"}</span>${c==="yes"?'<span class="tag">match</span>':c==="close"?'<span class="tag c">close</span>':""}<span class="pt">+${pts(id)}</span></button>`}).join('');
+ hostBox.innerHTML=`<section class="ticket"><h2>Who got it?</h2><p class="hint" style="text-align:left">Tap everyone who should score. Exact matches are already ticked.${H.mode==="charades"?" The actor gets +1 if anyone scores.":""}</p>
+ <div class="aw">${rows}</div><div class="stub"><button class="btn wide" id="aw">${H.round>=H.total?"Give points & finish":"Give points & next film"}</button></div></section>`;
+ hostBox.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const id=b.dataset.s;H.sel[id]=!H.sel[id];b.setAttribute('aria-pressed',!!H.sel[id])});
+ $('aw').onclick=award}
+
+home();
+}
+</script>
+</body>
+</html>
