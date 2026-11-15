@@ -3,12 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tollywood Guess Night – Online</title>
+<title>Tollywood Guess Night – Movies & GeoGuesser</title>
 <meta property="og:title" content="Tollywood Guess Night 🎬">
-<meta property="og:description" content="Join my Telugu movie guessing game! Emoji, clues, dumb charades.">
+<meta property="og:description" content="Join my game! Telugu movie guessing and GeoGuesser, play from your phone.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anek+Telugu:wght@400;600;800&family=Rozha+One&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* VOICE: loud single-screen cinema hall, festive party game
    IDEA: printed cinema ticket + release-day banner
@@ -84,6 +86,13 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #1d6f
 .podium{list-style:none;padding:0;margin:0}.podium li{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #c9a46a;font-size:18px}
 .podium li:first-child{font:400 28px/1.2 "Rozha One",serif;color:#a05a00}
 details{margin-top:12px}summary{cursor:pointer;font-weight:600;color:#7a3b16;min-height:32px}
+#map{height:min(62vh,540px);border-radius:12px;border:2px solid #e9c98a;background:#cfe3ee;z-index:0}
+#geoBox{padding:12px}#geoBox::before,#geoBox::after{display:none}#geoBox .row{margin-top:10px}
+.pin{background:none;border:0}.pin span{display:block;font-size:30px;line-height:1;filter:drop-shadow(0 2px 2px #0007)}
+.leaflet-tooltip.tt{font:600 12px "Anek Telugu",sans-serif;padding:2px 6px}
+.place{font:400 clamp(28px,8vw,44px)/1.1 "Rozha One",serif;text-align:center;margin:8px 0 4px}
+.res li .km{white-space:nowrap;font-weight:700}
+.gtab{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){.clues li.new{animation:none}}
 </style>
@@ -92,13 +101,15 @@ details{margin-top:12px}summary{cursor:pointer;font-weight:600;color:#7a3b16;min
 <div class="garland" aria-hidden="true"></div>
 <main>
 <div class="top"><h1>Tollywood Guess Night</h1><span class="pill off" id="net">Offline</span></div>
-<p class="sub">సినిమా పేరు చెప్పు! Online Telugu movie guessing with <span id="cnt"></span> films. Everyone plays from their own phone.</p>
+<p class="sub">సినిమా పేరు చెప్పు! Telugu movie guessing (<span id="cnt"></span> films) and GeoGuesser. Everyone plays from their own phone.</p>
 <div id="toast" class="toast" hidden></div>
 <div id="app"></div>
 <section class="ticket" id="guessBox" hidden>
  <form id="gf" class="row" autocomplete="off"><input type="text" id="gi" placeholder="Type the movie name" aria-label="Your guess" maxlength="60"><button class="btn ok" type="submit">Send</button></form>
  <p class="mine" id="mine"></p>
 </section>
+<section class="ticket" id="geoBox" hidden><div id="map" aria-label="World map, tap to drop your pin"></div>
+ <div class="row" id="geoCtl"><button class="btn ok wide" id="lock" disabled>Tap the map to drop your pin</button></div><p class="mine" id="geoMine"></p></section>
 <div id="hostBox"></div>
 <div class="board" id="board"></div>
 <p class="note" id="foot">Made for friends' game nights. Room traffic goes through a public relay, so don't type anything private.</p>
@@ -634,13 +645,207 @@ const M=[
 ["Hari Hara Veera Mallu",2025,"Pawan Kalyan","Krish & Jyothi Krisna","M. M. Keeravani","An outlaw sets out to steal the Kohinoor in Mughal times.","💎🗡️🏰"],
 ["Mad Square",2025,"Narne Nithiin, Sangeeth Shobhan & Ram Nithin","Kalyan Shankar","Bheems Ceciroleo","Three friends' Goa trip after a wedding turns chaotic.","🏖️🤪💍"],
 ].map(([t,y,l,d,m,p,e])=>({t,y,l,d,m,p,e}));
+
+// [name, lat, lng, region(te|in|w), emoji, what (shown in clue), where (revealed)]
+const P=[
+["Charminar",17.3616,78.4747,"te","🕌","16th-century monument with four minarets","Hyderabad, Telangana"],
+["Golconda Fort",17.3833,78.4011,"te","🏰","Hilltop fort famous for its diamonds and acoustics","Hyderabad, Telangana"],
+["Hussain Sagar Buddha Statue",17.4239,78.4738,"te","🧘","Monolithic Buddha standing in a lake","Hyderabad, Telangana"],
+["Ramoji Film City",17.2543,78.6808,"te","🎬","One of the world's largest film studio complexes","Near Hyderabad, Telangana"],
+["Ramappa Temple",18.2593,79.9431,"te","🛕","Kakatiya-era UNESCO temple with floating bricks","Mulugu, Telangana"],
+["Warangal Fort",17.9575,79.6145,"te","🏯","Kakatiya fort with the famous stone gateways","Warangal, Telangana"],
+["Bhadrachalam Temple",17.6688,80.8936,"te","🛕","Lord Rama temple on the Godavari built by Ramadasu","Bhadrachalam, Telangana"],
+["Yadadri Temple",17.5880,78.9450,"te","🛕","Hilltop Lakshmi Narasimha temple rebuilt in black stone","Yadagirigutta, Telangana"],
+["Kuntala Waterfalls",19.2186,78.4355,"te","💦","Tallest waterfall in Telangana","Adilabad, Telangana"],
+["Nagarjuna Sagar Dam",16.5752,79.3125,"te","🌊","One of the world's largest masonry dams","Telangana–Andhra border"],
+["Tirumala Venkateswara Temple",13.6833,79.3474,"te","🙏","Richest Hindu temple on seven hills","Tirumala, Andhra Pradesh"],
+["Srisailam Temple",16.0733,78.8681,"te","🔱","Jyotirlinga temple in the Nallamala forest","Srisailam, Andhra Pradesh"],
+["Araku Valley",18.3273,82.8775,"te","☕","Hill station known for coffee and tribal culture","Alluri Sitharama Raju dist., Andhra Pradesh"],
+["Borra Caves",18.2808,83.0386,"te","🦇","Million-year-old limestone caves in the Eastern Ghats","Ananthagiri Hills, Andhra Pradesh"],
+["RK Beach",17.7142,83.3237,"te","🏖️","City beach with a submarine museum","Visakhapatnam, Andhra Pradesh"],
+["Kanaka Durga Temple",16.5175,80.6045,"te","🛕","Goddess temple on Indrakeeladri hill by the Krishna","Vijayawada, Andhra Pradesh"],
+["Amaravati Stupa",16.5755,80.3577,"te","☸️","Ancient Buddhist stupa site","Amaravati, Andhra Pradesh"],
+["Lepakshi Temple",13.8033,77.6092,"te","🐂","Temple with a hanging pillar and giant Nandi","Sri Sathya Sai dist., Andhra Pradesh"],
+["Gandikota Canyon",14.8150,78.2856,"te","🏜️","India's 'Grand Canyon' on the Pennar river","Kadapa, Andhra Pradesh"],
+["Belum Caves",15.1023,78.1114,"te","🕳️","Second-longest cave system in India","Kurnool, Andhra Pradesh"],
+["Srikalahasti Temple",13.7496,79.6984,"te","🛕","Vayu linga temple on the Swarnamukhi river","Srikalahasti, Andhra Pradesh"],
+["Simhachalam Temple",17.7665,83.2504,"te","🦁","Varaha Lakshmi Narasimha hill temple","Visakhapatnam, Andhra Pradesh"],
+["Taj Mahal",27.1751,78.0421,"in","🕌","White marble Mughal mausoleum","Agra, Uttar Pradesh"],
+["India Gate",28.6129,77.2295,"in","🎖️","War memorial arch","New Delhi"],
+["Qutub Minar",28.5245,77.1855,"in","🗼","73-metre brick minaret","New Delhi"],
+["Red Fort",28.6562,77.2410,"in","🏰","Mughal fort where the PM hoists the flag","Old Delhi"],
+["Lotus Temple",28.5535,77.2588,"in","🪷","Bahá'í house of worship shaped like a flower","New Delhi"],
+["Gateway of India",18.9220,72.8347,"in","🚢","Arch monument on the waterfront","Mumbai, Maharashtra"],
+["Hawa Mahal",26.9239,75.8267,"in","🌬️","Pink 'Palace of Winds' with 953 windows","Jaipur, Rajasthan"],
+["Golden Temple",31.6200,74.8765,"in","✨","Holiest Sikh gurdwara","Amritsar, Punjab"],
+["Mysore Palace",12.3052,76.6552,"in","👑","Palace lit by 100,000 bulbs during Dasara","Mysuru, Karnataka"],
+["Hampi Virupaksha Temple",15.3350,76.4600,"in","🪨","Ruins of the Vijayanagara capital","Hampi, Karnataka"],
+["Meenakshi Temple",9.9195,78.1193,"in","🛕","Temple with towering colourful gopurams","Madurai, Tamil Nadu"],
+["Victoria Memorial",22.5448,88.3426,"in","🏛️","White marble hall built for a British queen","Kolkata, West Bengal"],
+["Howrah Bridge",22.5851,88.3468,"in","🌉","Cantilever bridge over the Hooghly","Kolkata, West Bengal"],
+["Konark Sun Temple",19.8876,86.0945,"in","☀️","Temple built as a giant stone chariot","Konark, Odisha"],
+["Jagannath Temple",19.8048,85.8179,"in","🛕","Temple of the famous Rath Yatra","Puri, Odisha"],
+["Kedarnath Temple",30.7352,79.0669,"in","🏔️","Himalayan Shiva temple at 3,500 m","Uttarakhand"],
+["Dashashwamedh Ghat",25.3070,83.0104,"in","🪔","Riverfront steps famous for the evening Ganga aarti","Varanasi, Uttar Pradesh"],
+["Statue of Unity",21.8380,73.7191,"in","🗿","World's tallest statue","Kevadia, Gujarat"],
+["Ajanta Caves",20.5519,75.7033,"in","🎨","Rock-cut Buddhist caves with ancient paintings","Maharashtra"],
+["Ellora Caves",20.0268,75.1771,"in","🪨","Rock-cut temples including Kailasa","Maharashtra"],
+["Khajuraho Temples",24.8318,79.9199,"in","🛕","Temples famed for intricate sculptures","Madhya Pradesh"],
+["Sanchi Stupa",23.4794,77.7398,"in","☸️","Great stupa built by Emperor Ashoka","Madhya Pradesh"],
+["White Rann of Kutch",23.8361,69.7211,"in","🧂","Vast white salt desert","Kutch, Gujarat"],
+["Dal Lake",34.1180,74.8700,"in","🛶","Lake of houseboats and shikaras","Srinagar, Jammu & Kashmir"],
+["Pangong Lake",33.7595,78.6674,"in","🏞️","High-altitude lake that changes colour","Ladakh"],
+["Munnar Tea Gardens",10.0889,77.0595,"in","🍃","Hill station of rolling tea estates","Kerala"],
+["Alleppey Backwaters",9.4981,76.3388,"in","🚤","Houseboats on palm-lined canals","Alappuzha, Kerala"],
+["Vivekananda Rock Memorial",8.0780,77.5550,"in","🌅","Memorial on a rock at India's southern tip","Kanyakumari, Tamil Nadu"],
+["Marina Beach",13.0500,80.2824,"in","🏖️","One of the longest urban beaches","Chennai, Tamil Nadu"],
+["Brihadeeswarar Temple",10.7828,79.1318,"in","🛕","Chola temple with a giant vimana","Thanjavur, Tamil Nadu"],
+["Basilica of Bom Jesus",15.5009,73.9116,"in","⛪","Church holding St Francis Xavier's remains","Old Goa"],
+["Jaisalmer Fort",26.9124,70.9123,"in","🏜️","Golden sandstone 'living fort'","Jaisalmer, Rajasthan"],
+["Lake Palace",24.5754,73.6800,"in","🏰","White palace floating on Lake Pichola","Udaipur, Rajasthan"],
+["Living Root Bridges",25.2420,91.6720,"in","🌳","Bridges grown from living tree roots","Meghalaya"],
+["Kaziranga National Park",26.5775,93.1711,"in","🦏","Home of the one-horned rhinoceros","Assam"],
+["Tawang Monastery",27.5859,91.8594,"in","🏯","India's largest Buddhist monastery","Arunachal Pradesh"],
+["Darjeeling",27.0410,88.2663,"in","🚂","Tea town with a toy train","West Bengal"],
+["Ram Mandir",26.7956,82.1943,"in","🛕","Grand new temple of Lord Rama","Ayodhya, Uttar Pradesh"],
+["Vaishno Devi",33.0298,74.9490,"in","⛰️","Cave shrine reached by a 12 km trek","Jammu & Kashmir"],
+["Somnath Temple",20.8880,70.4012,"in","🌊","First Jyotirlinga by the Arabian Sea","Gujarat"],
+["Gol Gumbaz",16.8302,75.7360,"in","🔊","Giant dome with a whispering gallery","Vijayapura, Karnataka"],
+["Radhanagar Beach",11.9846,92.9510,"in","🏝️","Island beach often rated Asia's best","Havelock, Andaman"],
+["Pamban Bridge",9.2814,79.2017,"in","🌉","Sea bridge to Rameswaram","Tamil Nadu"],
+["Laxman Jhula",30.1260,78.3290,"in","🌉","Suspension bridge over the Ganges","Rishikesh, Uttarakhand"],
+["Vidhana Soudha",12.9794,77.5910,"in","🏛️","Granite legislature building","Bengaluru, Karnataka"],
+["Rock Garden",30.7525,76.8101,"in","🗿","Garden of sculptures made from scrap","Chandigarh"],
+["Leh Palace",34.1650,77.5850,"in","🏯","Nine-storey royal palace in the mountains","Leh, Ladakh"],
+["Mehrangarh Fort",26.2980,73.0184,"in","🏰","Fort above the blue city","Jodhpur, Rajasthan"],
+["Eiffel Tower",48.8584,2.2945,"w","🗼","Iron lattice tower","Paris, France"],
+["Statue of Liberty",40.6892,-74.0445,"w","🗽","Copper statue holding a torch","New York, USA"],
+["Colosseum",41.8902,12.4922,"w","🏟️","Ancient amphitheatre of gladiators","Rome, Italy"],
+["Great Wall at Badaling",40.3588,116.0200,"w","🧱","Most visited stretch of the great wall","Near Beijing, China"],
+["Machu Picchu",-13.1631,-72.5450,"w","⛰️","Inca citadel high in the Andes","Peru"],
+["Christ the Redeemer",-22.9519,-43.2105,"w","✝️","Giant statue with open arms on a mountain","Rio de Janeiro, Brazil"],
+["Pyramids of Giza",29.9792,31.1342,"w","🔺","Ancient pyramids and the Sphinx","Giza, Egypt"],
+["Petra",30.3285,35.4444,"w","🏜️","City carved into rose-red rock","Jordan"],
+["Chichen Itza",20.6843,-88.5678,"w","🛕","Mayan step pyramid","Yucatán, Mexico"],
+["Sydney Opera House",-33.8568,151.2153,"w","🎭","Sail-shaped performing arts centre","Sydney, Australia"],
+["Big Ben",51.5007,-0.1246,"w","🕰️","Famous clock tower by a river","London, UK"],
+["Burj Khalifa",25.1972,55.2744,"w","🏙️","World's tallest building","Dubai, UAE"],
+["Leaning Tower of Pisa",43.7230,10.3966,"w","🗼","Tilting bell tower","Pisa, Italy"],
+["Sagrada Família",41.4036,2.1744,"w","⛪","Gaudí's unfinished basilica","Barcelona, Spain"],
+["Angkor Wat",13.4125,103.8670,"w","🛕","World's largest religious monument","Siem Reap, Cambodia"],
+["Mount Everest",27.9881,86.9250,"w","🏔️","Earth's highest peak","Nepal–China border"],
+["Niagara Falls",43.0962,-79.0377,"w","💦","Huge waterfalls on a border","USA–Canada border"],
+["Grand Canyon",36.1069,-112.1129,"w","🏜️","Mile-deep canyon cut by the Colorado river","Arizona, USA"],
+["Golden Gate Bridge",37.8199,-122.4783,"w","🌉","Red suspension bridge in the fog","San Francisco, USA"],
+["Times Square",40.7580,-73.9855,"w","🗽","Neon-lit crossroads of billboards","New York, USA"],
+["Mount Fuji",35.3606,138.7274,"w","🗻","Snow-capped volcano","Japan"],
+["Forbidden City",39.9163,116.3972,"w","🏯","Imperial palace complex","Beijing, China"],
+["Red Square",55.7539,37.6208,"w","⛪","Square with St Basil's colourful domes","Moscow, Russia"],
+["Acropolis",37.9715,23.7257,"w","🏛️","Hilltop citadel with the Parthenon","Athens, Greece"],
+["Stonehenge",51.1789,-1.8262,"w","🪨","Prehistoric stone circle","Wiltshire, UK"],
+["Neuschwanstein Castle",47.5576,10.7498,"w","🏰","Fairy-tale castle that inspired Disney","Bavaria, Germany"],
+["Santorini",36.4618,25.3753,"w","🏘️","White houses with blue domes over the sea","Greece"],
+["St Mark's Square",45.4341,12.3388,"w","🛶","Square in a city of canals and gondolas","Venice, Italy"],
+["Mount Kilimanjaro",-3.0674,37.3556,"w","🏔️","Africa's highest mountain","Tanzania"],
+["Victoria Falls",-17.9243,25.8572,"w","💦","'The smoke that thunders' waterfall","Zambia–Zimbabwe border"],
+["Table Mountain",-33.9628,18.4098,"w","⛰️","Flat-topped mountain over a coastal city","Cape Town, South Africa"],
+["Easter Island Moai",-27.1127,-109.3497,"w","🗿","Giant stone heads on a remote island","Rapa Nui, Chile"],
+["Uluru",-25.3444,131.0369,"w","🪨","Huge red sandstone monolith","Northern Territory, Australia"],
+["Marina Bay Sands",1.2834,103.8607,"w","🏨","Hotel with a ship-shaped rooftop pool","Singapore"],
+["Petronas Towers",3.1579,101.7116,"w","🏙️","Twin skyscrapers joined by a skybridge","Kuala Lumpur, Malaysia"],
+["Shwedagon Pagoda",16.7984,96.1495,"w","🛕","Gilded Buddhist stupa","Yangon, Myanmar"],
+["Borobudur",-7.6079,110.2038,"w","☸️","World's largest Buddhist temple","Java, Indonesia"],
+["Tanah Lot",-8.6212,115.0868,"w","🌊","Sea temple on a rock","Bali, Indonesia"],
+["Hagia Sophia",41.0086,28.9802,"w","🕌","Ancient domed cathedral turned mosque","Istanbul, Turkey"],
+["Cappadocia",38.6431,34.8289,"w","🎈","Fairy chimneys and hot-air balloons","Turkey"],
+["Dead Sea",31.5590,35.4732,"w","🧂","Salt lake where you float","Israel–Jordan border"],
+["Kaaba",21.4225,39.8262,"w","🕋","Holiest site in Islam","Mecca, Saudi Arabia"],
+["Sheikh Zayed Grand Mosque",24.4128,54.4750,"w","🕌","White mosque with 82 domes","Abu Dhabi, UAE"],
+["Burj Al Arab",25.1412,55.1853,"w","⛵","Sail-shaped luxury hotel","Dubai, UAE"],
+["Louvre Museum",48.8606,2.3376,"w","🖼️","Glass pyramid museum home of the Mona Lisa","Paris, France"],
+["Brandenburg Gate",52.5163,13.3777,"w","🏛️","Neoclassical gate, symbol of reunification","Berlin, Germany"],
+["Tower Bridge",51.5055,-0.0754,"w","🌉","Twin-towered bascule bridge","London, UK"],
+["Edinburgh Castle",55.9486,-3.1999,"w","🏰","Castle on an extinct volcano","Edinburgh, Scotland"],
+["Cliffs of Moher",52.9715,-9.4309,"w","🌊","Dramatic sea cliffs","Ireland"],
+["Matterhorn",45.9763,7.6586,"w","🏔️","Pyramid-shaped Alpine peak","Switzerland–Italy border"],
+["Mont Saint-Michel",48.6361,-1.5115,"w","🏰","Abbey on a tidal island","Normandy, France"],
+["Alhambra",37.1761,-3.5881,"w","🕌","Moorish palace and fortress","Granada, Spain"],
+["Charles Bridge",50.0865,14.4114,"w","🌉","Medieval stone bridge lined with statues","Prague, Czechia"],
+["Vatican St Peter's Basilica",41.9022,12.4539,"w","⛪","Largest church in the world","Vatican City"],
+["Amsterdam Dam Square",52.3731,4.8926,"w","🚲","Heart of a city of canals and bikes","Amsterdam, Netherlands"],
+["Hermitage Museum",59.9398,30.3146,"w","🖼️","Winter Palace art museum","St Petersburg, Russia"],
+["Blue Lagoon",63.8804,-22.4495,"w","♨️","Geothermal spa in lava fields","Iceland"],
+["Tromsø",69.6492,18.9553,"w","🌌","Arctic city famous for the northern lights","Norway"],
+["Hollywood Sign",34.1341,-118.3215,"w","🎬","Giant white letters on a hillside","Los Angeles, USA"],
+["Las Vegas Strip",36.1147,-115.1728,"w","🎰","Boulevard of casinos","Nevada, USA"],
+["Mount Rushmore",43.8791,-103.4591,"w","🗿","Four presidents carved in granite","South Dakota, USA"],
+["Old Faithful",44.4605,-110.8281,"w","♨️","Geyser that erupts like clockwork","Yellowstone, USA"],
+["CN Tower",43.6426,-79.3871,"w","🗼","Tall concrete communications tower","Toronto, Canada"],
+["Lake Louise",51.4254,-116.1773,"w","🏞️","Turquoise glacial lake in the Rockies","Alberta, Canada"],
+["White House",38.8977,-77.0365,"w","🏛️","Residence of the US president","Washington, D.C., USA"],
+["Kennedy Space Center",28.5729,-80.6490,"w","🚀","Launch site of the Moon missions","Florida, USA"],
+["Cloud Gate",41.8827,-87.6233,"w","🫘","Mirrored 'Bean' sculpture","Chicago, USA"],
+["Panama Canal",8.9966,-79.5915,"w","🚢","Locks linking two oceans","Panama"],
+["Iguazu Falls",-25.6953,-54.4367,"w","💦","Hundreds of waterfalls in the rainforest","Argentina–Brazil border"],
+["Galápagos Islands",-0.9538,-90.9656,"w","🐢","Islands that inspired Darwin","Ecuador"],
+["Salar de Uyuni",-20.1338,-67.4891,"w","🪞","World's largest salt flat, a giant mirror","Bolivia"],
+["Copacabana Beach",-22.9711,-43.1822,"w","🏖️","Famous wave-patterned promenade","Rio de Janeiro, Brazil"],
+["Teotihuacan",19.6925,-98.8438,"w","🔺","Pyramids of the Sun and Moon","Near Mexico City, Mexico"],
+["Sigiriya",7.9570,80.7603,"w","🦁","Ancient rock fortress","Sri Lanka"],
+["Swayambhunath",27.7149,85.2904,"w","🐒","'Monkey temple' stupa","Kathmandu, Nepal"],
+["Tiger's Nest Monastery",27.4919,89.3636,"w","🐅","Monastery clinging to a cliff","Paro, Bhutan"],
+["Potala Palace",29.6578,91.1170,"w","🏯","Former palace of the Dalai Lama","Lhasa, Tibet"],
+["Ha Long Bay",20.9101,107.1839,"w","⛵","Limestone islands rising from emerald water","Vietnam"],
+["Grand Palace Bangkok",13.7500,100.4913,"w","👑","Royal palace with the Emerald Buddha","Bangkok, Thailand"],
+["Fushimi Inari Shrine",34.9671,135.7727,"w","⛩️","Thousands of orange torii gates","Kyoto, Japan"],
+["Hiroshima Peace Memorial",34.3955,132.4536,"w","🕊️","Ruined dome left as a memorial","Hiroshima, Japan"],
+["Gyeongbokgung Palace",37.5796,126.9770,"w","🏯","Main royal palace of the Joseon dynasty","Seoul, South Korea"],
+["Taipei 101",25.0340,121.5645,"w","🏙️","Bamboo-shaped skyscraper","Taipei, Taiwan"],
+["Victoria Peak",22.2759,114.1455,"w","🚡","Hilltop view over a harbour skyline","Hong Kong"],
+["The Bund",31.2400,121.4900,"w","🌃","Waterfront facing a futuristic skyline","Shanghai, China"],
+["Terracotta Army",34.3841,109.2785,"w","🗿","Thousands of clay soldiers","Xi'an, China"],
+["Great Barrier Reef",-18.2871,147.6992,"w","🐠","World's largest coral reef system","Queensland, Australia"],
+["Milford Sound",-44.6414,167.8974,"w","🏞️","Fjord with sheer cliffs and waterfalls","New Zealand"],
+["Hobbiton",-37.8721,175.6829,"w","🧙","Movie set of hobbit holes","Matamata, New Zealand"],
+["Lalibela Churches",12.0317,39.0476,"w","⛪","Churches carved down into rock","Ethiopia"],
+["Jemaa el-Fnaa",31.6258,-7.9891,"w","🐍","Market square of snake charmers","Marrakech, Morocco"],
+["Erg Chebbi Dunes",31.1450,-4.0219,"w","🐫","Giant Sahara sand dunes","Morocco"],
+["Serengeti",-2.3333,34.8333,"w","🦁","Plains of the great migration","Tanzania"],
+["Abu Simbel",22.3372,31.6258,"w","🗿","Giant temple statues of Ramesses II","Egypt"],
+["Stone Town",-6.1630,39.1890,"w","🚪","Old spice-trade town","Zanzibar, Tanzania"],
+["Chernobyl",51.2763,30.2219,"w","☢️","Site of a 1986 nuclear disaster","Ukraine"],
+["Badshahi Mosque",31.5880,74.3100,"w","🕌","Grand Mughal-era mosque","Lahore, Pakistan"],
+["Malé",4.1755,73.5093,"w","🏝️","Tiny capital of an island nation","Maldives"],
+["Reykjavík",64.1466,-21.9426,"w","🌋","World's northernmost capital","Iceland"],
+["Honolulu",21.3069,-157.8583,"w","🌺","Island city by Waikiki beach","Hawaii, USA"],
+["Buenos Aires",-34.6037,-58.3816,"w","💃","Home of the tango","Argentina"],
+["Nairobi",-1.2921,36.8219,"w","🦒","Capital with a national park inside it","Kenya"],
+["Lagos",6.5244,3.3792,"w","🎶","Africa's biggest city, home of Afrobeats","Nigeria"],
+["Mexico City",19.4326,-99.1332,"w","🌮","Capital built on an Aztec city","Mexico"],
+["Tokyo",35.6762,139.6503,"w","🍣","World's largest metropolitan area","Japan"],
+["Colombo",6.9271,79.8612,"w","🛺","Island nation's commercial capital","Sri Lanka"],
+["Dhaka",23.8103,90.4125,"w","🛺","Capital of rickshaws","Bangladesh"],
+["Auckland",-36.8485,174.7633,"w","⛵","City of sails","New Zealand"],
+["Anchorage",61.2181,-149.9003,"w","🐻","Largest city in the US's biggest state","Alaska, USA"]
+].map(([n,lat,lng,r,e,w,loc])=>({n,lat,lng,r,e,w,loc}));
+
 const BROKERS=["wss://broker.hivemq.com:8884/mqtt","wss://broker.emqx.io:8084/mqtt","wss://test.mosquitto.org:8081"];
 const MODES={
  ladder:{n:"Clue Ladder",s:"5 clues, hardest first. Guess early for up to 5 points.",tm:0},
  emoji:{n:"Emoji Rush",s:"Everyone sees the emojis. 30 seconds. 2 points, 1 after a hint.",tm:30},
  vowel:{n:"Vowel Vanish",s:"Title with the vowels removed. 30 seconds. 2 points, 1 after a hint.",tm:30},
- charades:{n:"Dumb Charades",s:"One player acts on video call, only they see the title. 90 seconds.",tm:90}
+ charades:{n:"Dumb Charades",s:"One player acts on video call, only they see the title. 90 seconds.",tm:90},
+ geoWorld:{n:"World Wonders",s:"Famous places across the globe. Up to 1000 points by distance.",tm:45,g:"w"},
+ geoIndia:{n:"Incredible India",s:"Monuments and places across India.",tm:45,g:"in"},
+ geoTelugu:{n:"Telugu States",s:"Places in Andhra Pradesh & Telangana. Tough, the map is zoomed in!",tm:45,g:"te"},
+ geoMix:{n:"Mixed Bag",s:"World and India places together on the world map.",tm:45,g:"mix"}
 };
+const isGeo=m=>!!(MODES[m]&&MODES[m].g);
+const VIEWS={w:[[20,10],2],mix:[[20,10],2],in:[[22.5,80],4],te:[[16.3,80.2],6]};
+const SCALE={w:1500,mix:1500,in:400,te:100};
+function km(a,b,c,d){const R=6371,r=x=>x*Math.PI/180,dl=r(c-a),dg=r(d-b),h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.min(1,Math.sqrt(h)))}
+function geoPts(k,mode,reg){const s=mode==="geoMix"?(reg==="w"?1500:400):SCALE[MODES[mode].g];return k<1?1000:Math.round(1000*Math.exp(-k/s))}
+const fmtKm=k=>k<10?k.toFixed(1)+" km":Math.round(k).toLocaleString("en-IN")+" km";
 const ERAS={all:["All eras",0,9999],classic:["Before 2000",0,1999],mid:["2000–2014",2000,2014],new:["2015 onwards",2015,9999]};
 const $=id=>document.getElementById(id);
 const app=$('app'),boardEl=$('board'),hostBox=$('hostBox'),guessBox=$('guessBox');
@@ -651,7 +856,7 @@ const novowel=t=>t.toUpperCase().replace(/[AEIOU]/g,"").replace(/[.:–]/g,"").r
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const rid=n=>Array.from({length:n},()=>"abcdefghjkmnpqrstuvwxyz23456789"[Math.random()*31|0]).join('');
 const me={id:ls.get("tgn_id")||rid(10),name:ls.get("tgn_name","")};ls.set("tgn_id",me.id);
-let fanfare=false,cli=null,base="",role=null,code="",bi=0,V=null,H=null,endLocal=0,lastRound=-1,lastClue=0,myGuess="",ac=null;
+let myPin=null,sentPin=null,map=null,lyr=null,myMk=null,mapKey="",fanfare=false,cli=null,base="",role=null,code="",bi=0,V=null,H=null,endLocal=0,lastRound=-1,lastClue=0,myGuess="",ac=null;
 
 // ---------- fuzzy check ----------
 const norm=s=>String(s).toLowerCase().normalize("NFKD").replace(/[^a-z0-9]/g,"").replace(/aa/g,"a").replace(/ee/g,"i").replace(/oo/g,"u").replace(/th/g,"t").replace(/(.)\1+/g,"$1");
@@ -707,17 +912,17 @@ function sendGuess(text){if(!V||V.phase!=="clue"||V.locked)return;myGuess=text;
 $('gf').addEventListener('submit',e=>{e.preventDefault();const v=$('gi').value.trim().slice(0,60);if(!v)return;sendGuess(v);$('gi').value=""});
 
 function onState(s){const newRound=s.round!==lastRound;
- if(newRound){myGuess="";$('mine').textContent="";lastClue=0;if(s.phase==="clue")beep(523,.1)}
+ if(newRound){myGuess="";$('mine').textContent="";lastClue=0;myPin=null;sentPin=null;if(s.phase==="clue")beep(523,.1)}
  if(s.phase==="reveal"&&V&&V.phase!=="reveal")beep(784,.2);
  if(s.left!=null)endLocal=Date.now()+s.left*1000;else endLocal=0;
  if(s.phase!=="end")fanfare=false;V=s;lastRound=s.round;render()}
 
 // ---------- shared render ----------
 function render(){if(!role)return;board();
- const v=V;
+ const v=V;geoView(v);
  if(!v){app.innerHTML=`<section class="ticket"><div class="big">Waiting for the host…</div><p class="hint">Room ${esc(code)}. If this takes long, ask the host to open their game.</p></section>`;guessBox.hidden=true;hostPanel();return}
  const isActor=v.mode==="charades"&&v.actor===me.id;
- toast(v.lastAward&&v.phase==="clue"?"Last film: "+v.lastAward.map(a=>`<b>${esc(a.name)}</b> +${a.pts}`).join(", "):"");
+ toast(v.lastAward&&v.phase==="clue"?(isGeo(v.mode)?"Last place: ":"Last film: ")+v.lastAward.map(a=>`<b>${esc(a.name)}</b> +${a.pts}`).join(", "):"");
  if(v.phase==="lobby"){const inIt=v.players.some(p=>p.id===me.id);
   app.innerHTML=role==="host"?"":`<section class="ticket"><h2>${inIt?"You're in! 🎟️":"Joining…"}</h2><p class="hint" style="text-align:left">Waiting for the host to start. ${v.players.length} player${v.players.length===1?"":"s"} here.</p>
   <ul class="plist">${v.players.map(p=>`<li><span>${esc(p.name)}${p.id===me.id?" (you)":""}</span></li>`).join('')}</ul></section>`;
@@ -726,6 +931,7 @@ function render(){if(!role)return;board();
   app.innerHTML=`<section class="ticket"><div class="meta"><span>Final scores</span><span>${esc(MODES[v.mode].n)}</span></div><div class="big">${tie?"It's a tie! 🤝":"🏆 "+esc(r[0]?.name)+" wins!"}</div><ol class="podium">${r.map(p=>`<li><span>${esc(p.name)}</span><span>${p.score}</span></li>`).join('')}</ol>${role==="host"?"":`<p class="hint" style="margin-top:12px">The host can start another round.</p>`}</section>`;
   if(!fanfare){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.15),i*140));fanfare=true}
   guessBox.hidden=true;hostPanel();return}
+ if(isGeo(v.mode))return renderGeo(v);
  const sh=v.show||{},m=MODES[v.mode];let body="";
  if(v.mode==="ladder"){const labels=["Story","Year & music","Emoji","Director","Lead cast"];
   body=`<ul class="clues">${labels.map((l,i)=>i<sh.clues.length?`<li class="${i>=lastClue?"new":""}"><small>${l}</small>${i===2?`<span style="font-size:30px">${esc(sh.clues[i])}</span>`:esc(sh.clues[i])}</li>`:`<li class="locked"><small>Clue ${i+1}</small>Locked</li>`).join('')}</ul>`;lastClue=sh.clues.length}
@@ -743,6 +949,43 @@ function render(){if(!role)return;board();
  guessBox.hidden=!(v.phase==="clue"&&!v.locked&&!isActor);
  if(guessBox.hidden===false&&myGuess)$('mine').textContent="Your answer: "+myGuess+" (send again to change)";
  tickT();hostPanel()}
+function renderGeo(v){const sh=v.show||{},m=MODES[v.mode];guessBox.hidden=true;
+ const timer=v.phase==="clue"&&endLocal&&!v.locked?`<div class="secs" id="tn"></div>`:v.locked&&v.phase==="clue"?`<div class="secs">Time's up!</div>`:"";
+ let body=`<div class="emoji" style="font-size:44px;margin:4px 0">${esc(sh.e)}</div><div class="place">${esc(sh.n)}</div><p class="hint">${esc(sh.w)}</p>`;
+ if(v.phase==="reveal"&&v.answer){const a=v.answer;
+  body+=`<div class="ans">⭐ ${esc(a.n)}<small>${esc(a.loc)}</small></div><label class="l">Results</label><ol class="plist res">${(v.answers||[]).map((r,i)=>`<li><span><b>${i+1}. ${esc(r.name)}${r.id===me.id?" (you)":""}</b></span><span>${r.km==null?"<i>no pin</i>":`<span class="km">${fmtKm(r.km)}</span>`} <span class="tag">+${r.pts}</span></span></li>`).join('')}</ol>`}
+ else body+=`${timer}<p class="hint" style="margin-top:6px">Pin it on the map below. ${v.guessed.length} of ${v.players.length} pinned.</p>`;
+ app.innerHTML=`<section class="ticket"><div class="meta"><span>🌍 ${esc(m.n)} · Place ${v.round}/${v.total}</span><span>${v.phase==="reveal"?"Answer":"Up to 1000"}</span></div>${body}</section>`;
+ tickT();hostPanel()}
+const pinIcon=t=>window.L?L.divIcon({className:"pin",html:`<span>${t}</span>`,iconSize:[30,30],iconAnchor:[15,28]}):null;
+const PCOL=["#e8590c","#1d6fd8","#1f8a4c","#9c36b5","#c2255c","#0b7285","#5f3dc4","#d9480f","#2b8a3e","#a61e4d"];
+function ensureMap(){if(map)return true;if(!window.L)return false;
+ map=L.map('map',{worldCopyJump:true,minZoom:1,zoomSnap:.5}).setView([20,10],2);
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
+ lyr=L.layerGroup().addTo(map);
+ map.on('click',e=>{if(!V||!isGeo(V.mode)||V.phase!=="clue"||V.locked)return;const ll=e.latlng.wrap();myPin={lat:+ll.lat.toFixed(4),lng:+ll.lng.toFixed(4)};drawMine();updLock()});
+ return true}
+function drawMine(){if(myMk){myMk.remove();myMk=null}if(myPin&&lyr)myMk=L.marker([myPin.lat,myPin.lng],{icon:pinIcon("📍")}).addTo(lyr)}
+function updLock(){const b=$('lock');if(!myPin){b.disabled=true;b.textContent="Tap the map to drop your pin";$('geoMine').textContent="";return}
+ const same=sentPin&&sentPin.lat===myPin.lat&&sentPin.lng===myPin.lng;b.disabled=!!same;b.textContent=same?"Pin locked ✓":sentPin?"Update my pin":"Lock in my pin";
+ $('geoMine').textContent=same?"You can still move it until time runs out.":sentPin?"You moved your pin. Lock it in again.":"Happy with it? Lock it in."}
+$('lock').onclick=()=>{if(!myPin||!V||V.phase!=="clue"||V.locked)return;sentPin={...myPin};
+ if(role==="host")hostGuess(me.id,sentPin);else pub("/g/"+me.id,{lat:sentPin.lat,lng:sentPin.lng,round:V.round});beep(700,.06);updLock()};
+function geoView(v){const box=$('geoBox'),show=!!(v&&isGeo(v.mode)&&(v.phase==="clue"||v.phase==="reveal"));
+ if(!show){box.hidden=true;mapKey="";return}
+ const was=box.hidden;box.hidden=false;
+ if(!ensureMap()){$('geoCtl').hidden=true;$('geoMine').textContent="The map couldn't load. Check your internet and reload.";return}
+ if(was)setTimeout(()=>map.invalidateSize(),60);
+ $('geoCtl').hidden=!(v.phase==="clue"&&!v.locked);
+ const key=v.round+"-"+v.phase;if(key===mapKey){if(v.phase==="clue")updLock();return}
+ mapKey=key;lyr.clearLayers();myMk=null;
+ if(v.phase==="clue"){const vw=VIEWS[MODES[v.mode].g];setTimeout(()=>{map.invalidateSize();map.setView(vw[0],vw[1])},80);drawMine();updLock();return}
+ $('geoMine').textContent="";const a=v.answer;if(!a)return;const pts=[[a.lat,a.lng]];
+ L.marker([a.lat,a.lng],{icon:pinIcon("⭐"),zIndexOffset:1000}).addTo(lyr).bindTooltip(a.n,{permanent:true,direction:"top",offset:[0,-24],className:"tt"});
+ (v.answers||[]).forEach((r,i)=>{if(r.km==null)return;const c=PCOL[i%PCOL.length];pts.push([r.lat,r.lng]);
+  L.polyline([[r.lat,r.lng],[a.lat,a.lng]],{color:c,weight:2,dashArray:"6 6"}).addTo(lyr);
+  L.circleMarker([r.lat,r.lng],{radius:8,color:"#fff",weight:2,fillColor:c,fillOpacity:1}).addTo(lyr).bindTooltip(r.name+(r.id===me.id?" (you)":"")+" · "+fmtKm(r.km),{permanent:true,direction:"right",offset:[8,0],className:"tt"})});
+ setTimeout(()=>{map.invalidateSize();if(pts.length>1)map.fitBounds(pts,{padding:[40,40],maxZoom:9});else map.setView(pts[0],5)},80)}
 function board(){const v=V;if(!v||v.phase==="lobby"){boardEl.innerHTML="";return}
  boardEl.innerHTML=v.players.slice().sort((a,b)=>b.score-a.score).map(p=>`<div class="sc${p.id===me.id?" me":""}"><b>${esc(p.name)}${p.id===me.id?" (you)":""}</b><span>${p.score}</span>${v.phase==="clue"&&v.guessed.includes(p.id)?"<i>✓</i>":v.mode==="charades"&&v.actor===p.id?"<i>🎭</i>":""}</div>`).join('')}
 function tickT(){const n=$('tn');if(!n||!endLocal)return;const l=Math.max(0,Math.ceil((endLocal-Date.now())/1000));n.textContent=l+"s";if(l<=5&&l>0&&n.dataset.l!=l){n.dataset.l=l;beep(880,.06)}}
@@ -752,20 +995,24 @@ setInterval(tickT,250);
 async function hostGame(saved){app.innerHTML=`<section class="ticket"><div class="big">Opening your room…</div></section>`;
  let r;try{r=await connectAny(saved?saved.bi:null)}catch(e){return home("Couldn't reach the game server. Check your internet and try again.")}
  [cli,bi]=r;role="host";
- H=saved||{code:rid(5).toUpperCase(),mode:"ladder",era:"all",films:10,phase:"lobby",players:{},order:[],round:0,total:0,deck:[],cur:-1,clue:1,hint:false,locked:false,endAt:0,actor:null,guesses:{},sel:{},lastAward:null};
- H.bi=bi;code=H.code;base="tgn/v2/"+code;location.hash=code+"-"+bi;
+ H=saved||{code:rid(5).toUpperCase(),game:"movie",mode:"ladder",era:"all",films:10,phase:"lobby",players:{},order:[],round:0,total:0,deck:[],cur:-1,clue:1,hint:false,locked:false,endAt:0,actor:null,guesses:{},sel:{},lastAward:null};
+ H.bi=bi;if(!H.game)H.game="movie";code=H.code;base="tgn/v2/"+code;location.hash=code+"-"+bi;
  addPlayer(me.id,me.name);
  cli.on("message",(t,p)=>{const d=parse(p),k=t.slice(base.length);
   if(k.startsWith("/p/")){const id=k.slice(3);if(d&&d.name)addPlayer(id,String(d.name).slice(0,16));}
-  else if(k.startsWith("/g/")){const id=k.slice(3);if(d&&d.round===H.round)hostGuess(id,String(d.text||"").slice(0,60))}});
+  else if(k.startsWith("/g/")){const id=k.slice(3);if(!d||d.round!==H.round)return;
+   if(isGeo(H.mode)){const la=+d.lat,lo=+d.lng;if(isFinite(la)&&isFinite(lo)&&Math.abs(la)<=90&&Math.abs(lo)<=180)hostGuess(id,{lat:la,lng:lo})}
+   else hostGuess(id,String(d.text||"").slice(0,60))}});
  cli.subscribe([base+"/p/+",base+"/g/+"],{qos:1});
  publish()}
 function addPlayer(id,name){const ex=H.players[id];if(ex&&ex.name===name)return;H.players[id]={name,score:ex?ex.score:0};if(!H.order.includes(id))H.order.push(id);publish()}
 function hostGuess(id,text){if(H.phase!=="clue"||H.locked||!H.players[id]||(H.mode==="charades"&&id===H.actor)||!text)return;
- H.guesses[id]={text,clue:H.clue,hint:H.hint};publish()}
+ if(isGeo(H.mode)){if(typeof text!=="object")return;H.guesses[id]={lat:text.lat,lng:text.lng};return publish()}
+ if(typeof text!=="string")return;H.guesses[id]={text,clue:H.clue,hint:H.hint};publish()}
 const movie=()=>M[H.cur];
 function pts(id){const g=H.guesses[id];if(H.mode==="ladder")return g?Math.max(1,6-g.clue):1;if(H.mode==="charades")return 1;return g&&g.hint?1:2}
 function publish(){if(!H)return;ls.set("tgn_host_"+H.code,H);
+ if(isGeo(H.mode))return publishGeo();
  const m=H.cur>=0?movie():null,players=H.order.filter(id=>H.players[id]).map(id=>({id,name:H.players[id].name,score:H.players[id].score}));
  let show=null;
  if(m){if(H.mode==="ladder"){const c=[m.p,m.y+(m.m?" · music by "+m.m:""),m.e,m.d,m.l];show={clues:c.slice(0,H.clue)}}
@@ -774,46 +1021,72 @@ function publish(){if(!H)return;ls.set("tgn_host_"+H.code,H);
   left:H.phase==="clue"&&H.endAt&&!H.locked?Math.max(0,Math.round((H.endAt-Date.now())/1000)):null,
   guessed:Object.keys(H.guesses),answers:H.phase==="reveal"&&m?players.filter(p=>!(H.mode==="charades"&&p.id===H.actor)).map(p=>{const g=H.guesses[p.id];return{id:p.id,name:p.name,text:g?g.text:"",c:g?check(g.text,m.t):"",pts:pts(p.id)}}):null,answer:H.phase==="reveal"&&m?{t:m.t,y:m.y,l:m.l,d:m.d}:null,lastAward:H.lastAward};
  pub("/s",s,true);onState(s)}
+function publishGeo(){const g=H.cur>=0?P[H.cur]:null,players=H.order.filter(id=>H.players[id]).map(id=>({id,name:H.players[id].name,score:H.players[id].score}));
+ const s={v:2,phase:H.phase,mode:H.mode,round:H.round,total:H.total,players,show:g?{n:g.n,e:g.e,w:g.w}:null,locked:H.locked,actor:null,
+  left:H.phase==="clue"&&H.endAt&&!H.locked?Math.max(0,Math.round((H.endAt-Date.now())/1000)):null,guessed:Object.keys(H.guesses),
+  answers:H.phase==="reveal"?H.geoRes||[]:null,answer:H.phase==="reveal"&&g?{n:g.n,loc:g.loc,lat:g.lat,lng:g.lng}:null,lastAward:H.lastAward};
+ pub("/s",s,true);onState(s)}
 setInterval(()=>{if(H&&H.phase==="clue"&&H.endAt&&!H.locked&&Date.now()>=H.endAt){H.locked=true;beep(220,.5);publish()}},500);
-function startGame(){const[,a,b]=ERAS[H.era];
+function startGame(){if(isGeo(H.mode))return startGeo();const[,a,b]=ERAS[H.era];
  const pool=M.map((m,i)=>i).filter(i=>M[i].y>=a&&M[i].y<=b&&(H.mode!=="vowel"||novowel(M[i].t)!==M[i].t.toUpperCase()));
  let used=new Set(ls.get("tgn_used",[]));let fresh=pool.filter(i=>!used.has(M[i].t));if(fresh.length<H.films){used=new Set();fresh=pool}ls.set("tgn_used",[...used]);
  H.deck=shuf(fresh);H.total=Math.min(H.films,fresh.length);H.round=0;H.lastAward=null;
  for(const id in H.players)H.players[id].score=0;nextFilm()}
+function startGeo(){const g=MODES[H.mode].g;const pool=P.map((p,i)=>i).filter(i=>g==="mix"||(g==="in"?P[i].r!=="w":P[i].r===g));
+ let used=new Set(ls.get("tgn_used_geo",[]));let fresh=pool.filter(i=>!used.has(P[i].n));if(fresh.length<H.films){used=new Set();fresh=pool;ls.set("tgn_used_geo",[])}
+ H.deck=shuf(fresh);H.total=Math.min(H.films,fresh.length);H.round=0;H.lastAward=null;H.geoRes=null;
+ for(const id in H.players)H.players[id].score=0;nextFilm()}
 function nextFilm(){if(H.round>=H.total){H.phase="end";H.cur=-1;return publish()}
+ if(isGeo(H.mode)){H.round++;H.cur=H.deck.pop();{const u=ls.get("tgn_used_geo",[]);u.push(P[H.cur].n);ls.set("tgn_used_geo",u)}
+  H.locked=false;H.guesses={};H.geoRes=null;H.phase="clue";H.actor=null;H.endAt=Date.now()+MODES[H.mode].tm*1000;return publish()}
  H.round++;H.cur=H.deck.pop();{const u=ls.get("tgn_used",[]);u.push(M[H.cur].t);ls.set("tgn_used",u)}H.clue=1;H.hint=false;H.locked=false;H.guesses={};H.sel={};H.phase="clue";
  const tm=MODES[H.mode].tm;H.endAt=tm?Date.now()+tm*1000:0;
  if(H.mode==="charades"){const ids=H.order.filter(id=>H.players[id]);H.actor=ids[(H.round-1)%ids.length];const m=movie();
   pub("/x/"+H.actor,{round:H.round,t:m.t,y:m.y,words:words(m.t)},true);if(H.actor===me.id)secret={round:H.round,t:m.t,y:m.y,words:words(m.t)}}
  else H.actor=null;
  publish()}
-function reveal(){H.phase="reveal";H.locked=true;H.sel={};const m=movie();
+function reveal(){if(isGeo(H.mode)){const g=P[H.cur];H.phase="reveal";H.locked=true;
+  const res=H.order.filter(id=>H.players[id]).map(id=>{const q=H.guesses[id];if(!q)return{id,name:H.players[id].name,km:null,pts:0};
+   const k=km(q.lat,q.lng,g.lat,g.lng),p=geoPts(k,H.mode,g.r);H.players[id].score+=p;return{id,name:H.players[id].name,lat:q.lat,lng:q.lng,km:Math.round(k*10)/10,pts:p}});
+  res.sort((a,b)=>(a.km==null)-(b.km==null)||a.km-b.km);H.geoRes=res;H.lastAward=res.filter(r=>r.pts>0).slice(0,3).map(r=>({name:r.name,pts:r.pts}));return publish()}
+ H.phase="reveal";H.locked=true;H.sel={};const m=movie();
  for(const id in H.guesses)if(check(H.guesses[id].text,m.t)==="yes")H.sel[id]=true;publish()}
 function award(){const out=[];for(const id in H.sel)if(H.sel[id]&&H.players[id]){const p=pts(id);H.players[id].score+=p;out.push({name:H.players[id].name,pts:p})}
  if(H.mode==="charades"&&out.length&&H.players[H.actor]&&!H.sel[H.actor]){H.players[H.actor].score+=1;out.push({name:H.players[H.actor].name+" (acting)",pts:1})}
  H.lastAward=out.length?out:null;if(H.mode==="charades")pub("/x/"+H.actor,null,true);nextFilm()}
 
 function hostPanel(){if(role!=="host"||!H){hostBox.innerHTML="";return}
- if(H.phase==="lobby"){const url=shareURL(),msg=`🎬 Join my Tollywood Guess Night! Room ${code}\n${url}`;
+ if(H.phase==="lobby"){const url=shareURL(),msg=`${H.game==="geo"?"🌍 Join my GeoGuesser game!":"🎬 Join my Tollywood Guess Night!"} Room ${code}\n${url}`;
   app.innerHTML=`<section class="ticket"><h2>Your room is live</h2><div class="code">${esc(code)}</div>
   <div class="link" id="lk">${esc(url)}</div>
   <div class="row"><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Share on WhatsApp</a><button class="btn ghost" id="cp">Copy link</button></div>
   <label class="l">Players (${H.order.filter(id=>H.players[id]).length})</label>
   <ul class="plist">${H.order.filter(id=>H.players[id]).map(id=>`<li><span>${esc(H.players[id].name)}${id===me.id?" (you, host)":""}</span>${id===me.id?"":`<button class="x" data-k="${esc(id)}" aria-label="Remove">×</button>`}</li>`).join('')}</ul>
-  <label class="l">Game</label><div class="chips">${Object.entries(MODES).map(([k,m])=>`<button class="chip" data-mode="${k}" aria-pressed="${H.mode===k}"><b>${m.n}</b><span>${m.s}</span></button>`).join('')}</div>
-  <label class="l">Films from</label><div class="seg">${Object.entries(ERAS).map(([k,e])=>`<button class="chip" data-era="${k}" aria-pressed="${H.era===k}">${e[0]}</button>`).join('')}</div>
-  <label class="l">Number of films</label><div class="seg">${[5,10,15,20].map(n=>`<button class="chip" data-f="${n}" aria-pressed="${H.films===n}">${n}</button>`).join('')}</div>
-  <div class="stub"><button class="btn wide" id="go">Start the show 🎬</button><p class="hint" style="margin-top:8px;font-size:14px">${H.mode==="charades"?"Get everyone on a WhatsApp video call for charades.":"Players can join any time, even mid-game."}</p></div></section>`;
+  <label class="l">What are we playing?</label><div class="gtab"><button class="chip" data-game="movie" aria-pressed="${H.game!=="geo"}"><b>🎬 Movies</b><span>Guess the Telugu film</span></button><button class="chip" data-game="geo" aria-pressed="${H.game==="geo"}"><b>🌍 GeoGuesser</b><span>Pin the place on a map</span></button></div>
+  <label class="l">Mode</label><div class="chips">${Object.entries(MODES).filter(([k])=>isGeo(k)===(H.game==="geo")).map(([k,m])=>`<button class="chip" data-mode="${k}" aria-pressed="${H.mode===k}"><b>${m.n}</b><span>${m.s}</span></button>`).join('')}</div>
+  ${H.game==="geo"?"":`<label class="l">Films from</label><div class="seg">${Object.entries(ERAS).map(([k,e])=>`<button class="chip" data-era="${k}" aria-pressed="${H.era===k}">${e[0]}</button>`).join('')}</div>`}
+  <label class="l">Number of ${H.game==="geo"?"places":"films"}</label><div class="seg">${[5,10,15,20].map(n=>`<button class="chip" data-f="${n}" aria-pressed="${H.films===n}">${n}</button>`).join('')}</div>
+  <div class="stub"><button class="btn wide" id="go">Start the show 🎬</button><p class="hint" style="margin-top:8px;font-size:14px">${H.mode==="charades"?"Get everyone on a WhatsApp video call for charades.":H.game==="geo"?"Each place: 45 seconds to pin it. Closer pin, more points (max 1000).":"Players can join any time, even mid-game."}</p></div></section>`;
   hostBox.innerHTML="";
   $('cp').onclick=async()=>{try{await navigator.clipboard.writeText(url);$('cp').textContent="Copied ✓"}catch(e){const r=document.createRange();r.selectNodeContents($('lk'));getSelection().removeAllRanges();getSelection().addRange(r);$('cp').textContent="Selected, copy it"}};
   app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const id=b.dataset.k;delete H.players[id];H.order=H.order.filter(x=>x!==id);pub("/p/"+id,null,true);publish()});
   app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{H.mode=b.dataset.mode;publish()});
+  app.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{H.game=b.dataset.game;H.mode=H.game==="geo"?"geoWorld":"ladder";publish()});
   app.querySelectorAll('[data-era]').forEach(b=>b.onclick=()=>{H.era=b.dataset.era;publish()});
   app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{H.films=+b.dataset.f;publish()});
   $('go').onclick=startGame;return}
  if(H.phase==="end"){hostBox.innerHTML=`<section class="ticket"><div class="row"><button class="btn" id="again">Play again</button><button class="btn ghost" id="lob">Back to lobby</button></div></section>`;
   $('again').onclick=startGame;$('lob').onclick=()=>{H.phase="lobby";H.lastAward=null;publish()};return}
- const ids=H.order.filter(id=>H.players[id]),m=movie();
+ const ids=H.order.filter(id=>H.players[id]);
+ if(isGeo(H.mode)){
+  if(H.phase==="clue"){const done=ids.filter(id=>H.guesses[id]),wait=ids.filter(id=>!H.guesses[id]);
+   hostBox.innerHTML=`<section class="ticket"><h2>Host controls</h2><div class="row"><button class="btn ok" id="rv">Show answer</button><button class="btn ghost" id="end">End game</button></div>
+   <p class="hint" style="text-align:left;margin-top:12px"><b>${done.length} of ${ids.length} pinned.</b>${done.length===ids.length&&ids.length?" Everyone's in, show the answer!":""}</p>
+   <ul class="plist">${done.map(id=>`<li><span>${esc(H.players[id].name)}</span><span class="tag">pinned</span></li>`).join('')}${wait.map(id=>`<li><span>${esc(H.players[id].name)}</span><span class="tag c">waiting…</span></li>`).join('')}</ul></section>`;
+   $('rv').onclick=reveal;$('end').onclick=()=>{H.phase="end";publish()};return}
+  hostBox.innerHTML=`<section class="ticket"><p class="hint" style="text-align:left;margin-top:0">Points are given automatically by distance.</p><button class="btn wide" id="nx">${H.round>=H.total?"See final scores":"Next place"}</button></section>`;
+  $('nx').onclick=nextFilm;return}
+ const m=movie();
  if(H.phase==="clue"){const n=Object.keys(H.guesses).length;
   hostBox.innerHTML=`<section class="ticket"><h2>Host controls</h2><div class="row">
   ${H.mode==="ladder"&&H.clue<5?`<button class="btn" id="more">Next clue</button>`:""}
