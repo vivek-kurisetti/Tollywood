@@ -95,6 +95,9 @@ details{margin-top:12px}summary{cursor:pointer;font-weight:600;color:#7a3b16;min
 .place{font:400 clamp(28px,8vw,44px)/1.1 "Rozha One",serif;text-align:center;margin:8px 0 4px}
 .res li .km{white-space:nowrap;font-weight:700}
 .gtab{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px;margin:16px 0 10px}
+.tw{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:100%}.tw b{display:inline-flex;align-items:center;justify-content:center;width:clamp(26px,8vw,38px);height:clamp(34px,10vw,46px);border-radius:8px;background:#2b0f0a;color:var(--gold2);font:400 clamp(20px,6vw,28px)/1 "Rozha One",serif;box-shadow:0 3px 0 #000}
+.tw b.bk{background:#fff;border:2px dashed #c9a46a;box-shadow:none}
 [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){.clues li.new{animation:none}}
 </style>
@@ -646,6 +649,296 @@ const M=[
 ["Kingdom",2025,"Vijay Deverakonda","Gowtam Tinnanuri","Anirudh Ravichander","A constable goes undercover to find his long-lost brother.","👮🕵️👑"],
 ["Hari Hara Veera Mallu",2025,"Pawan Kalyan","Krish & Jyothi Krisna","M. M. Keeravani","An outlaw sets out to steal the Kohinoor in Mughal times.","💎🗡️🏰"],
 ["Mad Square",2025,"Narne Nithiin, Sangeeth Shobhan & Ram Nithin","Kalyan Shankar","Bheems Ceciroleo","Three friends' Goa trip after a wedding turns chaotic.","🏖️🤪💍"],
+["Iddaru Mitrulu",1961,"A. Nageswara Rao","Adurthi Subba Rao","S. Rajeswara Rao","Two close friends are tested when they love the same woman.","👬💕💔"],
+["Velugu Needalu",1961,"A. Nageswara Rao & Savitri","Adurthi Subba Rao","Pendyala Nageswara Rao","A poor girl sacrifices her love for the family that raised her.","🕯️👩💔"],
+["Ramudu Bheemudu",1964,"N. T. Rama Rao","Tapi Chanakya","Pendyala Nageswara Rao","Twins separated at birth, one meek and one bold, swap places.","👯😎😇"],
+["Doctor Chakravarthy",1964,"A. Nageswara Rao & Savitri","Adurthi Subba Rao","S. Rajeswara Rao","A doctor's friendship with a woman is misunderstood by society.","🩺👫😢"],
+["Pandava Vanavasam",1965,"N. T. Rama Rao","Kamalakara Kameswara Rao","Ghantasala","The Pandavas' years of exile in the forest.","🏹🌲👑"],
+["Gudachari 116",1966,"Krishna","M. Mallikarjuna Rao","T. Chalapathi Rao","A secret agent takes on an international crime gang.","🕵️🔫🎯"],
+["Sri Krishna Pandaveeyam",1966,"N. T. Rama Rao","N. T. Rama Rao","T. V. Raju","Krishna guides the Pandavas against the Kauravas' schemes.","🪈👑🏹"],
+["Ummadi Kutumbam",1967,"N. T. Rama Rao & Savitri","D. Yoganand","T. V. Raju","A joint family struggles to stay together.","👨‍👩‍👧‍👦🏡🤝"],
+["Sakshi",1967,"Krishna & Vijaya Nirmala","Bapu","K. V. Mahadevan","An honest villager testifies against a rowdy and pays the price.","⚖️👨‍🌾😠"],
+["Sudigundalu",1968,"A. Nageswara Rao","Adurthi Subba Rao","K. V. Mahadevan","A judge reflects on justice after his son's murder.","⚖️👨‍⚖️🌀"],
+["Buddhimantudu",1969,"A. Nageswara Rao","Bapu","K. V. Mahadevan","Twin brothers, one a devout priest and one a rationalist.","🙏🤔👯"],
+["Pandanti Kapuram",1972,"Krishna, S. V. Ranga Rao & Jamuna","Lakshmi Deepak","S. P. Kodandapani","A happy joint family is torn apart by greed.","🏡👨‍👩‍👧‍👦💔"],
+["Tata Manavadu",1973,"S. V. Ranga Rao & Raja Babu","Dasari Narayana Rao","Ramesh Naidu","A selfish son neglects his father; his own son learns from it.","👴👨👦"],
+["Devudu Chesina Manushulu",1973,"N. T. Rama Rao & Krishna","V. Ramachandra Rao","Ramesh Naidu","Two brothers on opposite sides of the law.","👬⚖️🔫"],
+["Sarada",1973,"Sobhan Babu & Sarada","K. Viswanath","K. Chakravarthy","A woman refuses to accept her husband's death.","💔👩🕯️"],
+["Soggadu",1975,"Sobhan Babu & Jayasudha","K. Bapaiah","K. V. Mahadevan","A handsome village man is caught between love and duty.","😎🌾💕"],
+["Jeevana Jyothi",1975,"Sobhan Babu & Vanisri","K. Viswanath","K. V. Mahadevan","A woman's love for her sister's child brings tragedy.","👶💔🕯️"],
+["Siri Siri Muvva",1976,"Chandra Mohan & Jaya Prada","K. Viswanath","K. V. Mahadevan","A mute dancer and a drummer fight society's judgment.","💃🥁🤐"],
+["Seeta Kalyanam",1976,"Ravi Kumar & Jayaprada","Bapu","K. V. Mahadevan","The story of Rama and Sita's wedding.","🏹💍🌸"],
+["Kurukshetram",1977,"Krishna & Sobhan Babu","Kamalakara Kameswara Rao","S. Rajeswara Rao","The great war of the Mahabharata.","⚔️🏹🐎"],
+["Mana Voori Pandavulu",1978,"Krishnam Raju & Chiranjeevi","Bapu","K. V. Mahadevan","Five villagers rise against a cruel landlord.","🖐️🌾✊"],
+["Karthika Deepam",1979,"Sobhan Babu, Sridevi & Sharada","Lakshmi Deepak","Satyam","A man's affair tears his family apart.","🪔💔👨‍👩‍👦"],
+["Thoorpu Velle Railu",1979,"Mohan & Jyothi","Bapu","S. P. Balasubrahmanyam","Love blossoms on an eastbound train journey.","🚂💕🌅"],
+["Punnami Naagu",1980,"Chiranjeevi","Rajasekhar","K. Chakravarthy","A man turns into a deadly snake on full moon nights.","🐍🌕😱"],
+["Subhodayam",1980,"Chandra Mohan & Sulakshana","K. Viswanath","K. V. Mahadevan","A sculptor and a dancer fall in love.","🗿💃🌅"],
+["Vamsa Vruksham",1980,"J. V. Somayajulu & Anil Kapoor","Bapu","K. V. Mahadevan","A young widow is pressured to marry within the family.","🌳👩💍"],
+["Gajadonga",1981,"N. T. Rama Rao & Sridevi","K. Raghavendra Rao","K. Chakravarthy","A master thief steals from the corrupt.","🦹💎😎"],
+["Mudda Mandaram",1981,"Pradeep & Poornima","Jandhyala","Ramesh Naidu","Teen lovers run away from their disapproving families.","🌺💑🏃"],
+["Radha Kalyanam",1981,"Chandra Mohan & Radhika","Bapu","K. V. Mahadevan","A woman marries a man she doesn't love; her old flame returns.","💍💔🌸"],
+["Manchu Pallaki",1982,"Chiranjeevi & Suhasini","Vamsy","Rajan–Nagendra","Unemployed friends befriend a dying girl.","❄️👬💔"],
+["Intlo Ramayya Veedhilo Krishnayya",1982,"Chiranjeevi & Madhavi","Kodi Ramakrishna","J. V. Raghavulu","A husband behaves perfectly at home but flirts outside.","🏠😇😏"],
+["Nalugu Stambhalata",1982,"Naresh & Poornima","Jandhyala","Rajan–Nagendra","Two couples navigate love and misunderstandings.","4️⃣💑😂"],
+["Eenadu",1982,"Krishna","P. Sambasiva Rao","J. V. Raghavulu","A man fights a corrupt village system.","✊🌾📰"],
+["Devatha",1982,"Sobhan Babu, Sridevi & Jaya Prada","K. Raghavendra Rao","K. Chakravarthy","A woman sacrifices her love for her sister.","👭💔🙏"],
+["Mundadugu",1983,"Krishna & Sobhan Babu","K. Bapaiah","K. Chakravarthy","Two friends take on a crooked landlord.","👬👊🌾"],
+["Goonda",1984,"Chiranjeevi","A. Kodandarami Reddy","K. Chakravarthy","A man becomes a goon to avenge his family.","😠👊🔥"],
+["Donga",1985,"Chiranjeevi & Radha","A. Kodandarami Reddy","K. Chakravarthy","A thief takes the place of a rich man to expose a villain.","🦹🎭💰"],
+["Vijetha",1985,"Chiranjeevi & Bhanupriya","A. Kodandarami Reddy","K. Chakravarthy","A youth sacrifices his dreams for his family.","🏆👨‍👩‍👦💪"],
+["Adavi Donga",1985,"Chiranjeevi & Radha","K. Raghavendra Rao","K. Chakravarthy","A forest-raised man fights for justice.","🌲🦹👊"],
+["Preminchu Pelladu",1985,"Rajendra Prasad & Bhanupriya","Vamsy","Ilaiyaraaja","A couple's love is tested after marriage.","💍💕🌧️"],
+["Kirathakudu",1986,"Chiranjeevi","A. Kodandarami Reddy","Ilaiyaraaja","A man fights a smuggling gang.","🏹🔥👊"],
+["Aalapana",1986,"Mohan & Bhanupriya","Vamsy","Ilaiyaraaja","A sculptor finds his muse in a classical dancer.","🗿💃🎶"],
+["Rendu Rella Aaru",1986,"Rajendra Prasad & Chandra Mohan","Jandhyala","Rajan–Nagendra","Two families' bickering turns into comedy.","2️⃣👨‍👩‍👧😂"],
+["Vikram",1986,"Nagarjuna & Shobana","V. Madhusudhana Rao","K. Chakravarthy","A young man fights to protect his family in his debut film.","👊👨‍👩‍👦🔥"],
+["Donga Mogudu",1987,"Chiranjeevi","A. Kodandarami Reddy","K. Chakravarthy","A thief replaces his rich lookalike in a troubled family.","👯🦹🏠"],
+["Aradhana",1987,"Chiranjeevi & Suhasini","Bharathiraja","Ilaiyaraaja","A rough villager falls for the schoolteacher.","👨‍🌾👩‍🏫💕"],
+["Lawyer Suhasini",1987,"Suhasini & Bhanuchander","Vamsy","S. P. Balasubrahmanyam","A woman lawyer fights a tricky case.","⚖️👩‍⚖️📜"],
+["Manchi Donga",1988,"Chiranjeevi & Vijayashanti","K. Raghavendra Rao","K. Chakravarthy","A thief with a good heart.","🦹❤️💰"],
+["Marana Mrudangam",1988,"Chiranjeevi","A. Kodandarami Reddy","Ilaiyaraaja","A man fights a powerful crime lord.","🥁💀👊"],
+["Trinetrudu",1988,"Chiranjeevi","A. Kodandarami Reddy","Raj–Koti","A man fights the villain who ruined his family.","👁️🔥⚔️"],
+["Janaki Ramudu",1988,"Nagarjuna & Vijayashanti","K. Raghavendra Rao","K. V. Mahadevan","Lovers reborn to finish their love story.","🔁💑🌸"],
+["Brahma Putrudu",1988,"Venkatesh & Rajani","Dasari Narayana Rao","K. Chakravarthy","A son is raised by a man who isn't his father.","👨‍👦🙏💪"],
+["Chupulu Kalasina Subhavela",1988,"Naresh & Ashwini","Jandhyala","Rajan–Nagendra","Love at first sight leads to comic chaos.","👀💕😂"],
+["Attaku Yamudu Ammayiki Mogudu",1989,"Chiranjeevi & Vijayashanti","A. Kodandarami Reddy","K. Chakravarthy","A man marries a rich girl and tames her arrogant mother.","👵😤💍"],
+["State Rowdy",1989,"Chiranjeevi","B. Gopal","Bappi Lahiri","A rowdy with a heart fights corrupt officials.","😎👊🏛️"],
+["Lankeshwarudu",1989,"Chiranjeevi","Dasari Narayana Rao","Raj–Koti","A man fights a crime lord to protect his sisters.","👊👭🔥"],
+["Prema",1989,"Venkatesh & Revathi","Suresh Krissna","Ilaiyaraaja","A singer loves a girl who is terminally ill.","🎤💔🏥"],
+["Dhruva Nakshatram",1989,"Venkatesh & Rajani","Y. Nageswara Rao","K. Chakravarthy","A rebel son takes on injustice.","⭐👊🔥"],
+["Bhale Donga",1989,"Nandamuri Balakrishna & Vijayashanti","A. Kodandarami Reddy","K. Chakravarthy","A thief turns hero to stop a gang.","🦹👊😎"],
+["Chettu Kinda Pleader",1989,"Rajendra Prasad","Vamsy","Ilaiyaraaja","A jobless lawyer takes up a bizarre case.","⚖️🌳😂"],
+["Indrudu Chandrudu",1989,"Kamal Haasan & Vijayashanti","Suresh Krissna","Ilaiyaraaja","A lookalike replaces a corrupt mayor.","👯🏛️😂"],
+["Jayammu Nischayammu Raa",1989,"Rajendra Prasad","Jandhyala",null,"A man's comic attempts at marriage.","💍😂🙏"],
+["Kodama Simham",1990,"Chiranjeevi","K. Murali Mohan Rao","Raj–Koti","A cowboy-style hero searches for treasure and family.","🤠🐎💰"],
+["Raja Vikramarka",1990,"Chiranjeevi & Radhika","Ravi Raja Pinisetty","Raj–Koti","A prince disguises himself to fight villains.","👑🎭⚔️"],
+["Nari Nari Naduma Murari",1990,"Nandamuri Balakrishna","A. Kodandarami Reddy","K. V. Mahadevan","A man caught between two women.","👩💑👩"],
+["Prema Yuddham",1990,"Nagarjuna & Amala","Rajendra Singh Babu","Hamsalekha","Lovers face their families' opposition.","💑⚔️💕"],
+["Stuartpuram Police Station",1991,"Chiranjeevi","Yandamuri Veerendranath","Ilaiyaraaja","A cop takes on a village of notorious thieves.","👮🦹🏚️"],
+["Coolie No. 1",1991,"Venkatesh & Tabu","K. Raghavendra Rao","Ilaiyaraaja","A railway porter tames a proud rich girl.","🧳🚂💕"],
+["Shatruvu",1991,"Venkatesh","Kodi Ramakrishna","Raj–Koti","A man fights the enemy who killed his family.","😠⚔️🔥"],
+["Nirnayam",1991,"Nagarjuna & Amala","Priyadarshan","Ilaiyaraaja","A cop is framed for a crime he didn't commit.","👮⚖️🏃"],
+["Chitram Bhalare Vichitram",1991,"Naresh","P. N. Ramachandra Rao",null,"Bachelors pretend to be married to rent a house.","🏠👗😂"],
+["Killer",1992,"Nagarjuna & Nagma","Fazil","Ilaiyaraaja","A hitman protects a little girl.","🔫👧🛡️"],
+["President Gari Pellam",1992,"Nagarjuna & Meena","A. Kodandarami Reddy","M. M. Keeravani","A man's wife becomes the village president.","👩‍⚖️💍😂"],
+["Sundarakanda",1992,"Venkatesh & Meena","K. Raghavendra Rao","M. M. Keeravani","A lecturer is chased by a lovestruck student.","👨‍🏫💌😳"],
+["Mechanic Alludu",1993,"Chiranjeevi & Vijayashanti","B. Gopal","Raj–Koti","A mechanic wins over his arrogant father-in-law.","🔧👨💍"],
+["Allari Alludu",1993,"Nagarjuna, Nagma & Meena","A. Kodandarami Reddy","M. M. Keeravani","A son-in-law takes on his scheming in-laws.","😂💍👨‍👩‍👧"],
+["Abbaigaru",1993,"Venkatesh & Meena","E. V. V. Satyanarayana","M. M. Keeravani","A son stands up to his cruel stepmother.","👨‍👩‍👦😤🏡"],
+["Allari Priyudu",1993,"Rajasekhar, Ramya Krishnan & Madhubala","K. Raghavendra Rao","M. M. Keeravani","A singer gets letters from a secret admirer.","🎤💌🎶"],
+["Money",1993,"J. D. Chakravarthy & Paresh Rawal","Siva Nageswara Rao","Sri","Two broke friends plot a kidnapping that goes hilariously wrong.","💰🤪👬"],
+["Pacchani Samsaram",1993,"Krishna & Aamani","Saratchandra",null,"A farmer's family stands together through hardship.","🌾👨‍👩‍👦💚"],
+["S. P. Parasuram",1994,"Chiranjeevi & Sridevi","Ravi Raja Pinisetty","M. M. Keeravani","An angry police officer takes on a crime lord.","👮🪓💥"],
+["Mugguru Monagallu",1994,"Chiranjeevi","K. Raghavendra Rao","Vidyasagar","Triplets separated at birth reunite.","👯👨🔥"],
+["Muddula Priyudu",1994,"Venkatesh & Ramya Krishnan","K. Raghavendra Rao","M. M. Keeravani","A young man's comic romance.","💕😂🎶"],
+["Super Police",1994,"Venkatesh & Nagma","K. Murali Mohan Rao","A. R. Rahman","A tough cop takes on crime.","👮💪🔥"],
+["Number One",1994,"Krishna & Soundarya","S. V. Krishna Reddy","S. V. Krishna Reddy","An honest officer takes on corruption.","1️⃣👮⚖️"],
+["Bangaru Kutumbam",1994,"A. Nageswara Rao & Jayasudha","Dasari Narayana Rao",null,"A patriarch holds his family together.","👴👨‍👩‍👧‍👦💛"],
+["Big Boss",1995,"Chiranjeevi & Roja","Vijaya Bapineedu","Bappi Lahiri","A man rises to become a powerful don.","👑🕶️💼"],
+["Rikshavodu",1995,"Chiranjeevi","Kodi Ramakrishna","Koti","A rickshaw puller fights for the poor.","🛺✊❤️"],
+["Gharana Bullodu",1995,"Nagarjuna & Ramya Krishnan","K. Raghavendra Rao","M. M. Keeravani","A villager clashes with a rich man's family.","😎🏡💕"],
+["Pokiri Raja",1995,"Venkatesh & Roja","A. Kodandarami Reddy","Raj–Koti","A carefree man exposes a corrupt businessman.","😎💼👊"],
+["Taj Mahal",1995,"Srikanth, Monica Bedi & Sanghavi","Muppalaneni Shiva","M. M. Srilekha","A young man builds his love a palace.","🕌💕🏗️"],
+["Money Money",1995,"J. D. Chakravarthy & Paresh Rawal","Siva Nageswara Rao","M. M. Keeravani","The broke friends land in another money mess.","💰💰🤪"],
+["Maavichiguru",1996,"Jagapathi Babu & Aamani","S. V. Krishna Reddy","S. V. Krishna Reddy","A dying wife arranges her husband's remarriage.","🌿💔💍"],
+["Pavitra Bandham",1996,"Venkatesh & Soundarya","Muthyala Subbaiah","M. M. Keeravani","A contract marriage turns into real love.","📜💍❤️"],
+["Dharma Chakram",1996,"Venkatesh & Ramya Krishnan","Suresh Krissna","M. M. Keeravani","A son fights for justice against his own father.","⚖️👨‍👦⚔️"],
+["Vinodam",1996,"Srikanth & Ravali","S. V. Krishna Reddy","S. V. Krishna Reddy","A man disguises himself to win his love.","🎭😂💕"],
+["Adavilo Anna",1997,"Mohan Babu","B. Gopal",null,"A Naxalite leader fights for tribals.","🌲✊🔫"],
+["Aavida Maa Aavide",1998,"Nagarjuna, Tabu & Heera","E. V. V. Satyanarayana","Sri","A man juggles two wives.","💍💍😅"],
+["Premante Idera",1998,"Venkatesh & Preity Zinta","Jayanth C. Paranjee","Ramana Gogula","A man protects his love from a powerful family.","💕🛡️🏃"],
+["Ganesh",1998,"Venkatesh & Rambha","Thirupathisamy","Mani Sharma","A journalist exposes a medical scam.","📰🩺⚖️"],
+["Ravoyi Chandamama",1999,"Nagarjuna & Anjala Zaveri","Jayanth C. Paranjee","Mani Sharma","A rich man falls for a poor girl.","🌙💕💰"],
+["Seetharama Raju",1999,"Nagarjuna & Harikrishna","Y. V. S. Chowdary","M. M. Keeravani","Two brothers feud with another family.","👬⚔️🌾"],
+["Iddaru Mitrulu",1999,"Chiranjeevi & Ramya Krishnan","K. Raghavendra Rao","Mani Sharma","Two friends' bond is tested by business.","👬💼💔"],
+["Nuvvu Vasthavani",2000,"Nagarjuna & Simran","V. R. Pratap","S. A. Rajkumar","A singer falls for a woman who loves music.","🎵💕🎤"],
+["Manoharam",2000,"Jagapathi Babu & Laya","Gunasekhar","Mani Sharma","A man fights terrorists to protect his family.","💣👨‍👩‍👦🛡️"],
+["Bava Nachadu",2001,"Nagarjuna, Simran & Reema Sen","K. S. Ravikumar","M. M. Keeravani","A man marries his love's sister by mistake.","💍😅👭"],
+["Akasa Veedhilo",2001,"Nagarjuna & Raveena Tandon","Singeetham Srinivasa Rao","M. M. Keeravani","A singer's tragic love story.","🎤☁️💔"],
+["Edurileni Manishi",2001,"Nagarjuna & Soundarya","K. S. Ravikumar","S. A. Rajkumar","A man takes on a gangster in a fight for justice.","👊🔥⚖️"],
+["Priyamaina Neeku",2001,"Tarun & Sneha","Bala Sekharan","Shiva Shankar","A shy man can't tell his friend he loves her.","💌🙈💕"],
+["Devi Putrudu",2001,"Venkatesh, Soundarya & Anjala Zaveri","Kodi Ramakrishna","Mani Sharma","An archaeologist uncovers the secret of an underwater city.","🌊🏛️🔱"],
+["Hanuman Junction",2001,"Arjun & Jagapathi Babu","M. Raja","Suresh Peters","Two friends' feud and friendship in a village.","👬🌾🤝"],
+["Sivaramaraju",2002,"Jagapathi Babu & Venkat","Venkat","S. A. Rajkumar","Brothers separated reunite for their sister.","👬👧🤝"],
+["Nuvvu Leka Nenu Lenu",2002,"Tarun & Aarthi Agarwal","Y. Kasi Viswanath","R. P. Patnaik","Childhood friends grow into lovers.","👫💕⏳"],
+["Holi",2002,"Uday Kiran & Richa Pallod","Ravi Teja",null,"A young man falls in love during a festival.","🎨💕🎉"],
+["Kalusukovalani",2002,"Uday Kiran & Gajala","Raghu Raj",null,"Two people keep missing each other.","💌🔄💕"],
+["Sreeram",2002,"Uday Kiran & Anita","V. N. Aditya",null,"A young man's love is tested by goons.","💕👊🌹"],
+["Thotti Gang",2002,"Allari Naresh & Prabhu Deva","E. V. V. Satyanarayana",null,"A gang of friends causes comic mayhem.","👬😂🎉"],
+["Sambaram",2003,"Nithiin & Nikita","Dasaradh","R. P. Patnaik","A boy loves his childhood friend.","🎉👫💕"],
+["Okariki Okaru",2003,"Sriram & Aarthi Chabria","Rasool Ellore","M. M. Keeravani","Two people who meet online fall in love.","💻💌💕"],
+["Neeku Nenu Naaku Nuvvu",2003,"Uday Kiran & Shriya Saran","Raja Sekhar","R. P. Patnaik","A couple wins over their families.","👫💕👨‍👩‍👧"],
+["Sivamani",2003,"Nagarjuna & Asin","Puri Jagannadh","Chakri","An encounter cop protects a girl.","👮🔫💕"],
+["Vasantam",2003,"Venkatesh, Aarthi Agarwal & Kalyani","Vikraman","S. A. Rajkumar","A man sacrifices his love for his friend.","🌸👬💔"],
+["Ninne Ishtapaddanu",2003,"Tarun & Sridevi Vijaykumar","Kondaa",null,"A young man falls for a girl at a wedding.","💍💕🎉"],
+["Grahanam",2004,"Tanikella Bharani","Mohan Krishna Indraganti",null,"A doctor investigates a village woman accused of infidelity.","🌑👩⚖️"],
+["Naa Autograph",2004,"Ravi Teja & Gopika","S. Gopal Reddy","M. M. Keeravani","A man revisits the loves of his past before his wedding.","✍️💌⏳"],
+["Nenunnanu",2004,"Nagarjuna & Shriya Saran","V. N. Aditya","M. M. Keeravani","A man protects a girl from her violent fiancé.","🛡️💕🎻"],
+["Sri Anjaneyam",2004,"Nithiin & Charmme","Krishna Vamsi","Mani Sharma","Lord Hanuman watches over a young devotee.","🐒🙏💪"],
+["Bhageeradha",2005,"Ravi Teja & Shriya Saran","Rasool Ellore","Chakri","A man works to bring water to his village.","💧🌾💪"],
+["Allari Bullodu",2005,"Nithiin & Trisha","K. Raghavendra Rao","M. M. Keeravani","Lookalikes swap places.","👯😎💕"],
+["Andarivaadu",2005,"Chiranjeevi & Tabu","Srinu Vaitla","Devi Sri Prasad","A father and son, both played by one actor, clash.","👨‍👦😂👯"],
+["Radha Gopalam",2005,"Srikanth & Sneha","Bapu",null,"A lawyer couple's ego clashes in marriage.","⚖️💑😤"],
+["Evadi Gola Vaadidi",2005,"Aryan Rajesh","E. V. V. Satyanarayana",null,"Everyone in town has their own problem in this comedy.","😂🏘️🤯"],
+["Khatarnak",2006,"Ravi Teja & Ileana","Amma Rajasekhar","Chakri","A man fights a corrupt politician.","💥😎👊"],
+["Boss",2006,"Nagarjuna & Nayanthara","V. N. Aditya","Harris Jayaraj","A boss falls for his employee.","💼💕😎"],
+["Samanyudu",2006,"Jagapathi Babu","Ravi C. Kumar",null,"A common man takes on the system.","👨⚖️✊"],
+["Seema Sastri",2007,"Allari Naresh","G. Nageswara Reddy",null,"A man pretends to be from a powerful family.","🎭😂💪"],
+["Operation Duryodhana",2007,"Srikanth","Pokuri Babu Rao",null,"A cop goes undercover into politics.","🏛️👮🎭"],
+["Okka Magadu",2008,"Nandamuri Balakrishna & Anushka Shetty","Y. V. S. Chowdary","Mani Sharma","A man and his grandfather fight injustice.","👴👨⚔️"],
+["Gopi Gopika Godavari",2009,"Venu Thottempudi & Kamalinee","Vamsy","Chakri","A singer falls for a teacher on the Godavari.","🎤🌊💕"],
+["Drona",2009,"Nithiin & Priyamani","J. Karunakaran","Anoop Rubens","A man avenges his father.","🏹😠🔥"],
+["Anjaneyulu",2009,"Ravi Teja & Nayanthara","Parasuram","S. Thaman","A TV journalist takes on a powerful man.","📺🐒👊"],
+["Maska",2009,"Ram Pothineni & Hansika Motwani","B. Gopal","Chakri","A man woos a girl while protecting her.","😎💕👊"],
+["Ganesh: Just Ganesh",2009,"Ram Pothineni & Kajal Aggarwal","M. Saravanan","Mickey J. Meyer","A carefree man helps a girl find her love.","😊💕🤝"],
+["Kathi Kantha Rao",2010,"Allari Naresh","E. V. V. Satyanarayana",null,"A man in a family of women gets into comic trouble.","🔪👨😂"],
+["Rama Rama Krishna Krishna",2010,"Ram Pothineni & Priya Anand","Srivas","M. M. Keeravani","A man shields a family from a faction feud.","🛡️👨‍👩‍👧🌵"],
+["Shambo Shiva Shambo",2010,"Ravi Teja, Allari Naresh & Siva Balaji","Samuthirakani","Sundar C. Babu","Friends help a couple elope and pay the price.","👬💑🏃"],
+["Kedi",2010,"Nagarjuna & Mamta Mohandas","Kiran Kumar","Sandeep Chowta","A gambler plans a big casino job.","🎰😎💰"],
+["Mogudu",2011,"Gopichand & Taapsee","Krishna Vamsi","Babu Shankar","A couple's families clash after the wedding.","💍👨‍👩‍👧😤"],
+["Wanted",2011,"Gopichand & Deeksha Seth","B. V. S. Ravi","Chakri","A man takes on a feared goon.","😠👊💥"],
+["Rajanna",2011,"Nagarjuna","Vijayendra Prasad","M. M. Keeravani","A girl searches for her father, a folk singer who fought the Razakars.","🎶👧✊"],
+["Gaganam",2011,"Nagarjuna & Prakash Raj","Radha Mohan","Pravin Mani","An NSG commando negotiates in a plane hijack.","✈️💣🎖️"],
+["Dhada",2011,"Naga Chaitanya & Kajal Aggarwal","Ajay Bhuyan","Devi Sri Prasad","A man's trip abroad brings love and danger.","✈️💕💥"],
+["Bejawada",2011,"Naga Chaitanya & Amala Paul","Vivek Krishna","Bappi Lahiri","A young man is caught in Vijayawada's gang wars.","🏙️🔪👬"],
+["Veera",2011,"Ravi Teja & Kajal Aggarwal","Ramesh Varma","S. Thaman","A man protects his sister from a gang.","👫🛡️💥"],
+["Solo",2011,"Nara Rohit & Nisha Agarwal","Parasuram","Mani Sharma","An orphan wants to marry into a big family.","👤💍👨‍👩‍👧‍👦"],
+["Shakti",2011,"N. T. Rama Rao Jr. & Ileana","Meher Ramesh","Mani Sharma","A man guards a sacred goddess's power.","🔱⚡👊"],
+["Daruvu",2012,"Ravi Teja & Taapsee","Siva","Vijay Antony","A dead man comes back to Earth in a minister's body.","😇🔄🏛️"],
+["Sarocharu",2012,"Ravi Teja & Kajal Aggarwal","Parasuram","Devi Sri Prasad","A man tells his love story to a girl who adores him.","💕📖😊"],
+["Devudu Chesina Manushulu",2012,"Ravi Teja & Ileana","Puri Jagannadh","Raghu Kunche","Two people are destined for each other.","🙏💑✨"],
+["Endukante Premanta!",2012,"Ram Pothineni & Tamannaah","A. Karunakaran","G. V. Prakash Kumar","Two spirits from the past meet their present selves.","👻💕🔁"],
+["Andala Rakshasi",2012,"Naveen Chandra, Rahul Ravindran & Lavanya Tripathi","Hanu Raghavapudi","Radhan","A man obsessed with a girl he loves from afar.","💌🌧️💔"],
+["Ee Rojullo",2012,"Srinivas & Reshma","Maruthi","J. B.","Young people's relationships in modern Hyderabad.","📱💕😂"],
+["Bus Stop",2012,"Prince & Sri Divya","Maruthi","J. B.","College friends' romances at a bus stop.","🚌💕🎓"],
+["Srimannarayana",2012,"Nandamuri Balakrishna & Isha Chawla","Ravi Chavali","Chakri","A journalist exposes a scam.","📰⚖️🔥"],
+["Toofan",2013,"Ram Charan & Priyanka Chopra","Apoorva Lakhia","Chirantan Bhatt","An angry cop busts an oil mafia.","👮🛢️💥"],
+["Venkatadri Express",2013,"Sundeep Kishan & Rakul Preet Singh","Merlapaka Gandhi","Ramana Gogula","A young man misses his train and chaos follows.","🚂😂🏃"],
+["Tadakha",2013,"Naga Chaitanya, Sunil & Tamannaah","Kishore Kumar Pardasani","S. Thaman","Two brothers, one a cop, take on a gangster.","👬👮💥"],
+["Ongole Githa",2013,"Ram Pothineni & Kriti Kharbanda","Bommarillu Bhaskar","Mani Sharma","A man fights a market mafia.","🐂🏪👊"],
+["Masala",2013,"Venkatesh & Ram Pothineni","K. Vijaya Bhaskar","S. Thaman","A man discovers his long-lost brother.","👬🎭😂"],
+["Bhai",2013,"Nagarjuna & Richa Gangopadhyay","Veerabhadram","Devi Sri Prasad","A don falls in love in Hong Kong.","🕶️💕🇭🇰"],
+["Shadow",2013,"Venkatesh & Taapsee","Meher Ramesh","S. Thaman","A man takes revenge in the shadows.","🌑🔫😠"],
+["Heart Attack",2014,"Nithiin & Adah Sharma","Puri Jagannadh","Anoop Rubens","A carefree traveller falls for a girl in Spain.","💓🇪🇸😎"],
+["Chinnadana Nee Kosam",2014,"Nithiin & Mishti","A. Karunakaran","Anoop Rubens","A man woos a girl by posing as her friend.","💕🎭😊"],
+["Paisa",2014,"Nani & Catherine Tresa","Krishna Vamsi","Sai Karthik","A sherwani salesman chases quick money.","💰🧥🏃"],
+["Autonagar Surya",2014,"Naga Chaitanya & Samantha","Deva Katta","Anoop Rubens","An orphan mechanic fights corruption in an auto market.","🔧🚗✊"],
+["Oka Laila Kosam",2014,"Naga Chaitanya & Pooja Hegde","Vijay Kumar Konda","Anoop Rubens","A man woos a girl who dislikes him.","💕🙅‍♀️😊"],
+["Pilla Nuvvu Leni Jeevitham",2014,"Sai Dharam Tej & Regina Cassandra","A. S. Ravi Kumar Chowdary","Anoop Rubens","A man is hired to kill but falls in love.","💕🔫😅"],
+["Power",2014,"Ravi Teja & Hansika Motwani","K. S. Ravindra (Bobby)","S. Thaman","A cop and his lookalike swap places.","👯👮💥"],
+["Jil",2015,"Gopichand & Raashi Khanna","Radha Krishna Kumar","Ghibran","A fire officer takes on a dreaded criminal.","🚒🔥👊"],
+["Surya vs Surya",2015,"Nikhil Siddhartha & Tridha Choudhury","Karthik Ghattamaneni","Sathya Mahaveer","A young man allergic to sunlight lives only at night.","🌞🚫🌙"],
+["Malli Malli Idi Rani Roju",2015,"Sharwanand & Nithya Menen","Kranthi Madhav","Gopi Sundar","An athlete and his love meet again after years.","🏃‍♂️💕⏳"],
+["Lion",2015,"Nandamuri Balakrishna & Trisha","Satyadev",null,"A man wakes up as someone else.","🦁🧠❓"],
+["Bengal Tiger",2015,"Ravi Teja & Tamannaah","Sampath Nandi","Bheems Ceciroleo","A man becomes famous to win a girl.","🐅😎💕"],
+["Loafer",2015,"Varun Tej & Disha Patani","Puri Jagannadh","Sunil Kashyap","A loafer searches for his mother.","👩‍👦🔍🏙️"],
+["Jenda Pai Kapiraju",2015,"Nani","Samuthirakani","G. V. Prakash Kumar","Two lookalikes, one honest and one corrupt.","🚩👯⚖️"],
+["Dohchay",2015,"Naga Chaitanya & Kriti Sanon","Sudheer Varma","Sunny M.R.","A conman gets trapped in a big scam.","🎭💰🏃"],
+["Sardaar Gabbar Singh",2016,"Pawan Kalyan & Kajal Aggarwal","K. S. Ravindra (Bobby)","Devi Sri Prasad","A cop protects a princess and a village.","👮🤠👑"],
+["Babu Bangaram",2016,"Venkatesh & Nayanthara","Maruthi","Ghibran","A soft-hearted cop helps a girl's family.","👮💛😂"],
+["Hyper",2016,"Ram Pothineni & Raashi Khanna","Santosh Srinivas","Ghibran","A son takes on a minister for his father.","👨‍👦🏛️💥"],
+["Sahasam Swasaga Sagipo",2016,"Naga Chaitanya & Manjima Mohan","Gautham Vasudev Menon","A. R. Rahman","A road trip turns into a deadly chase.","🏍️💕🔫"],
+["Majnu",2016,"Nani & Anu Emmanuel","Virinchi Varma","Gopi Sundar","An assistant director recalls his first love.","🎬💕💔"],
+["Srirastu Subhamastu",2016,"Allu Sirish & Lavanya Tripathi","Parasuram","S. Thaman","A rich man hides his wealth to win a middle-class girl.","💰🙈💍"],
+["Eedo Rakam Aado Rakam",2016,"Manchu Vishnu & Raj Tarun","G. Nageswara Reddy","Sai Karthik","Two friends' lies spiral out of control.","🤥😂👬"],
+["Thikka",2016,"Sai Dharam Tej","Sunil Reddy","S. Thaman","A heartbroken man has a wild night.","🍻🌃😵"],
+["Winner",2017,"Sai Dharam Tej & Rakul Preet Singh","Gopichand Malineni","S. Thaman","A man becomes a jockey to win his father back.","🏇🏆👨‍👦"],
+["LIE",2017,"Nithiin & Megha Akash","Hanu Raghavapudi","Mani Sharma","A conman gets caught in a spy game.","🤥🕵️🇺🇸"],
+["Mister",2017,"Varun Tej, Hebah Patel & Lavanya Tripathi","Srinu Vaitla","Mickey J. Meyer","A man helps a girl in Spain and falls for her.","🇪🇸💕😂"],
+["Radha",2017,"Sharwanand & Lavanya Tripathi","Chandra Mohan","Radhan","A Krishna devotee becomes a cop.","🪈👮💕"],
+["Paisa Vasool",2017,"Nandamuri Balakrishna & Shriya Saran","Puri Jagannadh","Anup Rubens","A gangster's past in Portugal comes back.","💰🇵🇹😎"],
+["Goutham Nanda",2017,"Gopichand & Hansika Motwani","Sampath Nandi","S. Thaman","A rich man and his poor lookalike swap lives.","👯💰🔄"],
+["Oxygen",2017,"Gopichand & Raashi Khanna","A. M. Jothi Krishna","Yuvan Shankar Raja","An army officer's secret mission.","🎖️💨🔥"],
+["Dwaraka",2017,"Vijay Deverakonda & Pooja Jhaveri","Srinivasa Ravindra","Sai Karthik","A thief poses as a godman.","🦹🙏😂"],
+["Fashion Designer s/o Ladies Tailor",2017,"Sumanth Ashwin","Vamsy",null,"A tailor's son believes fate will bring him a rich bride.","✂️👗😂"],
+["Ami Thumi",2017,"Adivi Sesh, Avasarala Srinivas & Eesha Rebba","Mohan Krishna Indraganti","Mani Sharma","Couples plan elopements around a stingy father.","💑🏃😂"],
+["Vunnadhi Okate Zindagi",2017,"Ram Pothineni & Anupama Parameswaran","Kishore Tirumala","Devi Sri Prasad","Childhood friends' friendship is tested by love.","👬💕🎸"],
+["Yuddham Sharanam",2017,"Naga Chaitanya & Lavanya Tripathi","Krishna R. V. Marimuthu","Vivek Sagar","A young man avenges his parents' murder.","⚔️😠👨‍👩‍👦"],
+["Jawaan",2017,"Sai Dharam Tej & Mehreen Pirzada","B. V. S. Ravi","S. Thaman","A youth protects a defence secret from a villain.","🇮🇳🛡️💥"],
+["Touch Chesi Chudu",2018,"Ravi Teja & Raashi Khanna","Vikram Sirikonda","Pritam","A brick factory owner's past as a cop returns.","🧱👮💥"],
+["Nela Ticket",2018,"Ravi Teja & Malvika Sharma","Kalyan Krishna","Shakthikanth Karthick","An orphan adopts an entire colony as family.","🎟️🏘️❤️"],
+["Amar Akbar Anthony",2018,"Ravi Teja & Ileana","Srinu Vaitla","S. Thaman","A man with multiple personalities takes revenge in the US.","🎭🇺🇸😠"],
+["Chalo",2018,"Naga Shaurya & Rashmika Mandanna","Venky Kudumula","Mahati Swara Sagar","A man falls for a girl in a village divided by a border.","🗺️💕😂"],
+["Inttelligent",2018,"Sai Dharam Tej & Lavanya Tripathi","V. V. Vinayak","S. Thaman","A software engineer avenges his mentor.","💻😠🔥"],
+["Tej I Love You",2018,"Sai Dharam Tej & Anupama Parameswaran","A. Karunakaran","Gopi Sundar","A man helps a girl who has lost her memory.","💕🧠🎶"],
+["Shailaja Reddy Alludu",2018,"Naga Chaitanya & Anu Emmanuel","Maruthi","Gopi Sundar","A calm man deals with an egoistic wife and mother-in-law.","😌💍👵"],
+["Srinivasa Kalyanam",2018,"Nithiin & Raashi Khanna","Satish Vegesna","Mickey J. Meyer","A grand traditional wedding brings two families together.","💍👨‍👩‍👧🎉"],
+["Devadas",2018,"Nagarjuna & Nani","Sriram Aditya","Mani Sharma","A don and a doctor become unlikely friends.","🕶️🩺👬"],
+["NOTA",2018,"Vijay Deverakonda","Anand Shankar","Sam C. S.","A carefree young man suddenly becomes chief minister.","🗳️👔😮"],
+["Officer",2018,"Nagarjuna","Ram Gopal Varma","Ravi Shankar","An honest cop investigates a fake encounter.","👮🔫⚖️"],
+["Needi Naadi Oke Katha",2018,"Sree Vishnu","Venu Udugula","Suresh Bobbili","A student who fails exams clashes with his father.","📚👨‍👦😤"],
+["Pantham",2018,"Gopichand & Mehreen Pirzada","K. Chakravarthy","Gopi Sundar","A thief steals from a corrupt minister.","🦹🏛️💰"],
+["Aatagallu",2018,"Nara Rohit & Jagapathi Babu","Paruchuri Murali",null,"A film director is accused of murdering his wife.","🎬🔪⚖️"],
+["Jai Simha",2018,"Nandamuri Balakrishna & Nayanthara","K. S. Ravikumar","Chirantan Bhatt","A man with a child hides from his past.","🦁👶🔥"],
+["Raja Vaaru Rani Gaaru",2019,"Kiran Abbavaram & Rahasya Gorak","Ravi Kiran Kola","Jay Krish","A shy village boy can't confess his love.","🙈💕🏡"],
+["Chanakya",2019,"Gopichand & Mehreen Pirzada","Thiru","Vishal Chandrasekhar","A spy goes after a terrorist.","🕵️💣♟️"],
+["Ranarangam",2019,"Sharwanand & Kajal Aggarwal","Sudheer Varma","Prashant Pillai","A bootlegger rises in 1990s Vizag.","🍾🔫🌊"],
+["Ruler",2019,"Nandamuri Balakrishna & Sonal Chauhan","K. S. Ravikumar","Chirantan Bhatt","A businessman's past as a cop resurfaces.","👮💼🔥"],
+["Ninu Veedani Needanu Nene",2019,"Sundeep Kishan & Anya Singh","Caarthick Raju","S. Thaman","A couple sees other faces in the mirror.","🪞👻💑"],
+["Johaar",2020,"Esther Anil & others","Teja Marni","Priyadarshan Balasubramanian","Lives collide as a minister builds a statue.","🗽🏛️💔"],
+["Disco Raja",2020,"Ravi Teja","Vi Anand","S. Thaman","A dead man is revived by scientists.","🕺🧪🔄"],
+["Ma Vintha Gaadha Vinuma",2020,"Siddhu Jonnalagadda","Aditya Mandala",null,"A couple's wedding video goes viral.","📱💍😳"],
+["Sreekaram",2021,"Sharwanand & Priyanka Arul Mohan","Kishore Reddy","Mickey J. Meyer","A techie quits his job to farm in his village.","💻➡️🌾"],
+["Cinema Bandi",2021,"Vikas Vasistha","Praveen Kandregula","Sirish Satyavolu","An auto driver finds a camera and makes a film with villagers.","🎥🛺🏘️"],
+["Mail",2021,"Priyadarshi","Uday Gurrala","Sweekar Agasthi","A village boy's first email in 2005.","📧💻🏡"],
+["Maha Samudram",2021,"Sharwanand & Siddharth","Ajay Bhupathi","Chaitan Bharadwaj","Two friends' lives change in Vizag's underworld.","🌊👬🔫"],
+["SR Kalyanamandapam",2021,"Kiran Abbavaram","Sridhar Gade","Chaitan Bharadwaj","A son tries to revive his father's wedding hall.","💍🏛️👨‍👦"],
+["Paagal",2021,"Vishwak Sen","Naresh Kuppili","Radhan","A young man looking for love proposes to every girl.","💕🤪🌹"],
+["Republic",2021,"Sai Dharam Tej","Deva Katta","Mani Sharma","An IAS officer fights a corrupt system.","🏛️⚖️🇮🇳"],
+["Maestro",2021,"Nithiin & Tamannaah","Merlapaka Gandhi","Mahati Swara Sagar","A pianist pretending to be blind witnesses a murder.","🎹🕶️🔪"],
+["Pushpaka Vimanam",2021,"Anand Deverakonda","Damodara",null,"A teacher's wife goes missing after the wedding.","💍❓🏫"],
+["Sridevi Soda Center",2021,"Sudheer Babu & Anandhi","Karuna Kumar","Mani Sharma","An electrician loves a soda shop owner's daughter.","🥤⚡💕"],
+["Check",2021,"Nithiin & Rakul Preet Singh","Chandra Sekhar Yeleti","Kalyani Malik","A death-row prisoner becomes a chess master.","♟️⛓️🧠"],
+["Wild Dog",2021,"Nagarjuna","Ahishor Solomon","S. Thaman","An NIA officer hunts a terrorist.","🐕🕵️💣"],
+["Aadavallu Meeku Johaarlu",2022,"Sharwanand & Rashmika Mandanna","Kishore Tirumala","Devi Sri Prasad","A man must win over a houseful of women to marry his love.","👩‍👩‍👧‍👧💍😅"],
+["Khiladi",2022,"Ravi Teja","Ramesh Varma","Devi Sri Prasad","A con man chases a huge stash of money.","💰🃏😎"],
+["Ramarao on Duty",2022,"Ravi Teja","Sarath Mandava","Sam C. S.","A government officer investigates missing people.","🏛️🔍👮"],
+["Thank You",2022,"Naga Chaitanya","Vikram Kumar","S. Thaman","A successful man thanks those who shaped his life.","🙏💼❤️"],
+["Bhamakalapam",2022,"Priyamani","Abhimanyu",null,"A nosy housewife gets caught in a theft.","🍳🔍💎"],
+["Ori Devuda",2022,"Vishwak Sen","Ashwath Marimuthu","Leon James","A man gets a second chance from God.","🙏🔄💕"],
+["Itlu Maredumilli Prajaneekam",2022,"Allari Naresh","A. R. Mohan","Sricharan Pakala","A teacher on election duty fights for tribals.","🗳️🌲👨‍🏫"],
+["Macherla Niyojakavargam",2022,"Nithiin & Krithi Shetty","M. S. Rajashekhar Reddy","Mahati Swara Sagar","An IAS officer takes on a village tyrant.","🏛️👊🗳️"],
+["18 Pages",2022,"Nikhil Siddhartha & Anupama Parameswaran","Palnati Surya Pratap","Gopi Sundar","A man falls for a girl through her diary.","📔💕🔍"],
+["Aa Ammayi Gurinchi Meeku Cheppali",2022,"Sudheer Babu & Krithi Shetty","Mohan Krishna Indraganti","Vivek Sagar","A director wants an eye doctor to star in his film.","🎬👩‍⚕️💕"],
+["Highway",2022,"Anand Deverakonda","K. V. Guhan",null,"A photographer chases a serial killer on the highway.","🛣️📷🔪"],
+["Custody",2023,"Naga Chaitanya","Venkat Prabhu","Ilaiyaraaja & Yuvan Shankar Raja","A constable must keep a criminal alive.","👮⛓️🏃"],
+["Ugram",2023,"Allari Naresh","Vijay Kanakamedala","Sricharan Pakala","A cop hunts for his missing wife and daughter.","👮😠🔍"],
+["Ravanasura",2023,"Ravi Teja","Sudheer Varma","Bheems Ceciroleo","A lawyer is suspected in a series of murders.","⚖️🔪🎭"],
+["Das Ka Dhamki",2023,"Vishwak Sen","Vishwak Sen","Leon James","A waiter impersonates a rich pharma CEO.","🍽️🎭💊"],
+["Michael",2023,"Sundeep Kishan","Ranjit Jeyakodi","Sam C. S.","A gangster's loyal man falls in love.","🔫💕🕶️"],
+["Spy",2023,"Nikhil Siddhartha","Garry B. H.","Sricharan Pakala","A RAW agent investigates a secret about Netaji.","🕵️🇮🇳📜"],
+["Rangamarthanda",2023,"Prakash Raj & Ramya Krishnan","Krishna Vamsi","Ilaiyaraaja","A retired stage actor struggles with his children.","🎭👴💔"],
+["Mem Famous",2023,"Sumanth Prabhas","Sumanth Prabhas","Kalyan Nayak","Three village youths try to become famous.","📱👬🌟"],
+["Bedurulanka 2012",2023,"Kartikeya Gummakonda","Clax","Mani Sharma","A village panics at an end-of-the-world prophecy.","🌍😱🏘️"],
+["Mangalavaaram",2023,"Payal Rajput","Ajay Bhupathi","B. Ajaneesh Loknath","Mysterious deaths strike a village every Tuesday.","📅💀🏘️"],
+["Keedaa Cola",2023,"Brahmanandam & Tharun Bhascker","Tharun Bhascker","Vivek Sagar","A cockroach in a cola bottle starts a crazy scheme.","🪳🥤💰"],
+["Gandeevadhari Arjuna",2023,"Varun Tej","Praveen Sattaru","Mickey J. Meyer","A bodyguard uncovers a toxic waste plot.","🏹🛡️☣️"],
+["Extra Ordinary Man",2023,"Nithiin & Sreeleela","Vakkantham Vamsi","Harris Jayaraj","A junior artist becomes a hero for real.","🎬🦸😂"],
+["Operation Valentine",2024,"Varun Tej & Manushi Chhillar","Shakti Pratap Singh Hada","Mickey J. Meyer","An air force pilot plans a strike after an attack.","✈️🇮🇳💥"],
+["Eagle",2024,"Ravi Teja","Karthik Gattamneni","Davzand","A journalist chases the story of a mysterious marksman.","🦅🔫📰"],
+["Ooru Peru Bhairavakona",2024,"Sundeep Kishan","Vi Anand","Shekar Chandra","A thief enters a cursed village.","👻🏘️🦹"],
+["Bhimaa",2024,"Gopichand","A. Harsha","Ravi Basrur","A cop fights a goon in a temple town.","👮🔱💥"],
+["Aay",2024,"Narne Nithiin","Anji K. Maniputhra","Ram Miriyala","Village friends and a love story in the Godavari region.","🌴💕👬"],
+["Gangs of Godavari",2024,"Vishwak Sen","Krishna Chaitanya","Yuvan Shankar Raja","A small-time crook rises in Godavari politics.","🌊🔪🏛️"],
+["Mathu Vadalara 2",2024,"Sri Simha Koduri & Satya","Ritesh Rana","Kaala Bhairava","The two friends become special agents and land in another mess.","🕵️😂2️⃣"],
+["Double iSmart",2024,"Ram Pothineni & Sanjay Dutt","Puri Jagannadh","Mani Sharma","A gangster's memory is copied into a street hitman.","🧠🧠💥"],
+["Matka",2024,"Varun Tej","Karuna Kumar","G. V. Prakash Kumar","A refugee rises to run Vizag's gambling racket.","🎲💰🌊"],
+["Zebra",2024,"Satyadev","Eashvar Karthic","Ravi Basrur","A bank officer gets trapped in a money fraud.","🦓🏦💰"],
+["Pottel",2024,"Yuva Chandraa","Sahit Mothkuri",null,"A shepherd fights for his daughter's education.","🐐👧📚"],
+["Mechanic Rocky",2024,"Vishwak Sen","Ravi Teja Mullapudi","Jakes Bejoy","A mechanic gets caught in a property scam.","🔧🏠😎"],
+["Bachhala Malli",2024,"Allari Naresh","Subbu Mangadevi","Vishal Chandrasekhar","An angry villager's life is ruled by his temper.","😡🌾🍺"],
+["Robinhood",2025,"Nithiin & Sreeleela","Venky Kudumula","G. V. Prakash Kumar","A thief who steals from the rich becomes a bodyguard.","🏹💰🛡️"],
+["Laila",2025,"Vishwak Sen","Ram Narayan","Leon James","A beautician disguises himself as a woman.","💄🎭😂"],
+["Jack",2025,"Siddhu Jonnalagadda","Bommarillu Bhaskar","Achu Rajamani","A young man takes on secret missions on his own.","🕵️😎💥"],
+["Keshava",2017,"Nikhil Siddhartha","Sudheer Varma","Sunny M.R.","A man whose heart is on the right side takes revenge.","❤️➡️😠"],
+["Shankarabharanam",2015,"Nikhil Siddhartha","Uday Nandanavanam",null,"A US-raised man visits Bihar and gets kidnapped.","🇺🇸➡️🇮🇳😱"],
+["Pandaga Chesko",2015,"Ram Pothineni & Rakul Preet Singh","Gopichand Malineni","S. Thaman","A businessman returns home to set things right.","🎉💼🏡"],
+["Shivam",2015,"Ram Pothineni & Raashi Khanna","Srinivasa Reddy","Devi Sri Prasad","A man helps lovers elope.","💑🏃🔥"],
+["Soukhyam",2015,"Gopichand & Regina Cassandra","A. S. Ravi Kumar Chowdary","Anoop Rubens","A man protects a girl from goons.","🛡️👧👊"],
+["Kotha Janta",2014,"Allu Sirish & Regina Cassandra","Maruthi","J. B.","Two TV anchors pretend to be a couple.","📺💑🎭"],
+["Ra Ra Krishnayya",2014,"Sundeep Kishan & Regina Cassandra","Mahesh Babu P.","Achu Rajamani","A driver kidnaps his boss's daughter.","🚗👧😅"],
+["Thammudu",2025,"Nithiin","Venu Sriram","B. Ajaneesh Loknath","A brother races to save his sister.","👫🏃💥"]
 ].map(([t,y,l,d,m,p,e])=>({t,y,l,d,m,p,e}));
 
 // [name, lat, lng, region(te|in|w), emoji, what (shown in clue), where (revealed)]
@@ -841,6 +1134,8 @@ const MODES={
  ladder:{n:"Clue Ladder",s:"5 clues, hardest first. Guess early for up to 5 points.",tm:0},
  emoji:{n:"Emoji Rush",s:"Everyone sees the emojis. 30 seconds. 2 points, 1 after a hint.",tm:30},
  vowel:{n:"Vowel Vanish",s:"Title with the vowels removed. 30 seconds. 2 points, 1 after a hint.",tm:30},
+ scramble:{n:"Scrambled",s:"Letters of each word jumbled up. 45 seconds. 2 points, 1 after a hint.",tm:45},
+ blanks:{n:"Fill the Blanks",s:"First letter and a few others shown, the rest are blanks. 45 seconds.",tm:45},
  charades:{n:"Dumb Charades",s:"One player acts on video call, only they see the title. 90 seconds.",tm:90},
  geoWorld:{n:"World Wonders",s:"Famous places across the globe. Up to 1000 points by distance.",tm:45,g:"w"},
  geoIndia:{n:"Incredible India",s:"Monuments and places across India.",tm:45,g:"in"},
@@ -859,6 +1154,16 @@ const app=$('app'),boardEl=$('board'),hostBox=$('hostBox'),guessBox=$('guessBox'
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const words=t=>t.split(/\s+/).length;
+const letters=w=>[...w].filter(c=>/[A-Za-z0-9]/.test(c)).length;
+function scrambleTitle(t,seed){let s=seed||1;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};
+ return t.toUpperCase().split(/\s+/).map(w=>w.replace(/[^A-Z0-9]/g,"")).filter(Boolean).map(w=>{const ch=[...w];if(ch.length<2||new Set(ch).size<2)return w;
+  for(let k=0;k<8;k++){const a=ch.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}if(a.join("")!==w)return a.join("")}return ch.reverse().join("")}).join("   ")}
+function blankTitle(t,seed,level){let s=(seed||7)+13;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};
+ return t.toUpperCase().split(/\s+/).map(w=>w.replace(/[^A-Z0-9]/g,"")).filter(Boolean).map(w=>{const ch=[...w];
+  const idx=ch.map((c,i)=>i).slice(1);for(let i=idx.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
+  const show=new Set([0,...idx.slice(0,Math.round(idx.length*(level?0.6:0.34)))]);
+  return ch.map((c,i)=>show.has(i)?c:"_").join(" ")}).join("     ")}
+const canScramble=t=>t.toUpperCase().split(/\s+/).some(w=>new Set([...w].filter(c=>/[A-Z0-9]/.test(c))).size>1);
 const novowel=t=>t.toUpperCase().replace(/[AEIOU]/g,"").replace(/[.:–]/g,"").replace(/\s+/g," ").trim();
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const rid=n=>Array.from({length:n},()=>"abcdefghjkmnpqrstuvwxyz23456789"[Math.random()*31|0]).join('');
@@ -944,6 +1249,8 @@ function render(){if(!role)return;board();
   body=`<ul class="clues">${labels.map((l,i)=>i<sh.clues.length?`<li class="${i>=lastClue?"new":""}"><small>${l}</small>${i===2?`<span style="font-size:30px">${esc(sh.clues[i])}</span>`:esc(sh.clues[i])}</li>`:`<li class="locked"><small>Clue ${i+1}</small>Locked</li>`).join('')}</ul>`;lastClue=sh.clues.length}
  else if(v.mode==="emoji")body=`<div class="emoji">${esc(sh.e)}</div>`;
  else if(v.mode==="vowel")body=`<div class="big" style="letter-spacing:3px">${esc(sh.nv)}</div>`;
+ else if(v.mode==="scramble")body=`<div class="tiles">${esc(sh.sc).split("   ").map(w=>`<span class="tw">${[...w].map(c=>`<b>${c}</b>`).join("")}</span>`).join("")}</div>`;
+ else if(v.mode==="blanks")body=`<div class="tiles">${esc(sh.bl).split("     ").map(w=>`<span class="tw">${w.split(" ").map(c=>`<b class="${c==="_"?"bk":""}">${c==="_"?"":c}</b>`).join("")}</span>`).join("")}</div>`;
  else{const actor=v.players.find(p=>p.id===v.actor);
   body=isActor&&secret&&secret.round===v.round&&v.phase==="clue"?`<p class="hint">You're acting! Only you can see this. No talking 🤐</p><div class="ans">${esc(secret.t)}<small>${secret.words} word${secret.words>1?"s":""} · ${secret.y}</small></div>`:`<div class="big">🎭 ${esc(actor?actor.name:"Someone")} is acting</div><p class="hint">Watch them on the video call and type your guess.</p>`}
  const info=v.mode==="ladder"||isActor?"":`<p class="hint">${sh.words} word${sh.words>1?"s":""}${sh.hint?" · "+esc(sh.hint):""}</p>`;
@@ -1059,7 +1366,9 @@ function publish(){if(!H)return;ls.set("tgn_host_"+H.code,H);
  const m=H.cur>=0?movie():null,players=H.order.filter(id=>H.players[id]).map(id=>({id,name:H.players[id].name,score:H.players[id].score}));
  let show=null;
  if(m){if(H.mode==="ladder"){const c=[m.p,m.y+(m.m?" · music by "+m.m:""),m.e,m.d,m.l];show={clues:c.slice(0,H.clue)}}
-  else{show={words:words(m.t),hint:H.hint?m.y+" · "+m.l:""};if(H.mode==="emoji")show.e=m.e;if(H.mode==="vowel")show.nv=novowel(m.t)}}
+  else{show={words:words(m.t),hint:H.hint?m.y+" · "+m.l:""};if(H.mode==="emoji")show.e=m.e;if(H.mode==="vowel")show.nv=novowel(m.t);
+   if(H.mode==="scramble"){show.sc=scrambleTitle(m.t,H.seed);if(H.hint)show.hint="Starts with "+m.t[0].toUpperCase()+" · "+m.y+" · "+m.l}
+   if(H.mode==="blanks"){show.bl=blankTitle(m.t,H.seed,H.hint)}}}
  const s={v:2,phase:H.phase,mode:H.mode,round:H.round,total:H.total,players,show,locked:H.locked,actor:H.actor,
   left:H.phase==="clue"&&H.endAt&&!H.locked?Math.max(0,Math.round((H.endAt-Date.now())/1000)):null,
   guessed:Object.keys(H.guesses),answers:H.phase==="reveal"&&m?players.filter(p=>!(H.mode==="charades"&&p.id===H.actor)).map(p=>{const g=H.guesses[p.id];return{id:p.id,name:p.name,text:g?g.text:"",c:g?check(g.text,m.t):"",pts:pts(p.id)}}):null,answer:H.phase==="reveal"&&m?{t:m.t,y:m.y,l:m.l,d:m.d}:null,lastAward:H.lastAward};
@@ -1071,10 +1380,14 @@ function publishGeo(){const g=H.cur>=0?P[H.cur]:null,players=H.order.filter(id=>
  pub("/s",s,true);onState(s)}
 setInterval(()=>{if(H&&H.phase==="clue"&&H.endAt&&!H.locked&&Date.now()>=H.endAt){H.locked=true;beep(220,.5);publish()}},500);
 function startGame(){if(isGeo(H.mode))return startGeo();const[,a,b]=ERAS[H.era];
- const pool=M.map((m,i)=>i).filter(i=>M[i].y>=a&&M[i].y<=b&&(H.mode!=="vowel"||novowel(M[i].t)!==M[i].t.toUpperCase()));
- let used=new Set(ls.get("tgn_used",[]));let fresh=pool.filter(i=>!used.has(M[i].t));if(fresh.length<H.films){used=new Set();fresh=pool}ls.set("tgn_used",[...used]);
- H.deck=shuf(fresh);H.total=Math.min(H.films,fresh.length);H.round=0;H.lastAward=null;
+ const pool=M.map((m,i)=>i).filter(i=>M[i].y>=a&&M[i].y<=b&&(H.mode!=="vowel"||novowel(M[i].t)!==M[i].t.toUpperCase())&&(H.mode!=="scramble"||canScramble(M[i].t)));
+ const key=m=>m.t+"|"+m.y;let used=new Set(ls.get("tgn_used2",[]));let fresh=pool.filter(i=>!used.has(key(M[i])));
+ if(fresh.length<H.films){used=new Set();fresh=pool;ls.set("tgn_used2",[])}
+ H.deck=mixDeck(fresh);H.total=Math.min(H.films,fresh.length);H.round=0;H.lastAward=null;
  for(const id in H.players)H.players[id].score=0;nextFilm()}
+function mixDeck(idx){const B={};idx.forEach(i=>{const y=M[i].y,k=y<1990?0:y<2000?1:y<2010?2:y<2018?3:4;(B[k]=B[k]||[]).push(i)});
+ const bs=shuf(Object.values(B).map(shuf));const out=[];while(bs.some(b=>b.length))shuf(bs).forEach(b=>{if(b.length)out.push(b.pop())});
+ return out.reverse()}
 function startGeo(){const g=MODES[H.mode].g;const pool=P.map((p,i)=>i).filter(i=>g==="mix"||(g==="in"?P[i].r!=="w":P[i].r===g));
  let used=new Set(ls.get("tgn_used_geo",[]));let fresh=pool.filter(i=>!used.has(P[i].n));if(fresh.length<H.films){used=new Set();fresh=pool;ls.set("tgn_used_geo",[])}
  H.deck=shuf(fresh);H.total=Math.min(H.films,fresh.length);H.round=0;H.lastAward=null;H.geoRes=null;
@@ -1082,7 +1395,7 @@ function startGeo(){const g=MODES[H.mode].g;const pool=P.map((p,i)=>i).filter(i=
 function nextFilm(){if(H.round>=H.total){H.phase="end";H.cur=-1;return publish()}
  if(isGeo(H.mode)){H.round++;H.cur=H.deck.pop();{const u=ls.get("tgn_used_geo",[]);u.push(P[H.cur].n);ls.set("tgn_used_geo",u)}
   H.locked=false;H.guesses={};H.geoRes=null;H.phase="clue";H.actor=null;H.endAt=Date.now()+MODES[H.mode].tm*1000;return publish()}
- H.round++;H.cur=H.deck.pop();{const u=ls.get("tgn_used",[]);u.push(M[H.cur].t);ls.set("tgn_used",u)}H.clue=1;H.hint=false;H.locked=false;H.guesses={};H.sel={};H.phase="clue";
+ H.round++;H.cur=H.deck.pop();H.seed=1+Math.floor(Math.random()*200000);{const u=ls.get("tgn_used2",[]);u.push(M[H.cur].t+"|"+M[H.cur].y);ls.set("tgn_used2",u)}H.clue=1;H.hint=false;H.locked=false;H.guesses={};H.sel={};H.phase="clue";
  const tm=MODES[H.mode].tm;H.endAt=tm?Date.now()+tm*1000:0;
  if(H.mode==="charades"){const ids=H.order.filter(id=>H.players[id]);H.actor=ids[(H.round-1)%ids.length];const m=movie();
   pub("/x/"+H.actor,{round:H.round,t:m.t,y:m.y,words:words(m.t)},true);if(H.actor===me.id)secret={round:H.round,t:m.t,y:m.y,words:words(m.t)}}
@@ -1133,7 +1446,7 @@ function hostPanel(){if(role!=="host"||!H){hostBox.innerHTML="";return}
  if(H.phase==="clue"){const n=Object.keys(H.guesses).length;
   hostBox.innerHTML=`<section class="ticket"><h2>Host controls</h2><div class="row">
   ${H.mode==="ladder"&&H.clue<5?`<button class="btn" id="more">Next clue</button>`:""}
-  ${(H.mode==="emoji"||H.mode==="vowel")&&!H.hint?`<button class="btn ghost" id="hi">Give hint</button>`:""}
+  ${["emoji","vowel","scramble","blanks"].includes(H.mode)&&!H.hint?`<button class="btn ghost" id="hi">Give hint</button>`:""}
   <button class="btn ok" id="rv">Show answer</button></div>
   ${(()=>{const el=ids.filter(id=>!(H.mode==="charades"&&id===H.actor)),done=el.filter(id=>H.guesses[id]),wait=el.filter(id=>!H.guesses[id]);
    return `<p class="hint" style="text-align:left;margin-top:12px"><b>${done.length} of ${el.length} answered.</b>${done.length===el.length&&el.length?" Everyone's in, show the answer!":""}</p><ul class="plist">${done.map(id=>`<li><span>${esc(H.players[id].name)}</span><span class="tag">answered</span></li>`).join('')}${wait.map(id=>`<li><span>${esc(H.players[id].name)}</span><span class="tag c">waiting…</span></li>`).join('')}</ul>`})()}
