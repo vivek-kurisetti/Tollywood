@@ -1437,16 +1437,158 @@ const TT=TT_RAW.filter(r=>r[0]!=="Lion").map(([t,y,l,d,c,s,k])=>({t,y,l,d,c,s,k}
 const SG=SG_RAW.map(([s,t,y,mu])=>({t,y,l:mu?"Music: "+mu:"",d:"",song:s}));
 const CC=CC_RAW.map(([t,y,d,...cast])=>({t,y,l:"",d,cast}));
 
+// Clue Ladder: [title, year, director, hero, heroine, villain|null]
+const LD_RAW=[
+["Pokiri",2006,"Puri Jagannadh","Mahesh Babu","Ileana D'Cruz","Prakash Raj"],
+["Okkadu",2003,"Gunasekhar","Mahesh Babu","Bhumika Chawla","Prakash Raj"],
+["Arjun",2004,"Gunasekhar","Mahesh Babu","Shriya Saran","Prakash Raj"],
+["Khaleja",2010,"Trivikram Srinivas","Mahesh Babu","Anushka Shetty","Prakash Raj"],
+["Dookudu",2011,"Srinu Vaitla","Mahesh Babu","Samantha","Sonu Sood"],
+["Businessman",2012,"Puri Jagannadh","Mahesh Babu","Kajal Aggarwal","Prakash Raj"],
+["Srimanthudu",2015,"Koratala Siva","Mahesh Babu","Shruti Haasan","Sampath Raj"],
+["Spyder",2017,"A. R. Murugadoss","Mahesh Babu","Rakul Preet Singh","S. J. Suryah"],
+["Bharat Ane Nenu",2018,"Koratala Siva","Mahesh Babu","Kiara Advani","Prakash Raj"],
+["Maharshi",2019,"Vamshi Paidipally","Mahesh Babu","Pooja Hegde","Jagapathi Babu"],
+["Sarileru Neekevvaru",2020,"Anil Ravipudi","Mahesh Babu","Rashmika Mandanna","Prakash Raj"],
+["Sarkaru Vaari Paata",2022,"Parasuram","Mahesh Babu","Keerthy Suresh","Samuthirakani"],
+["Nijam",2003,"Teja","Mahesh Babu","Rakshita","Gopichand"],
+["Athadu",2005,"Trivikram Srinivas","Mahesh Babu","Trisha",null],
+["Murari",2001,"Krishna Vamsi","Mahesh Babu","Sonali Bendre",null],
+["1: Nenokkadine",2014,"Sukumar","Mahesh Babu","Kriti Sanon",null],
+["Guntur Kaaram",2024,"Trivikram Srinivas","Mahesh Babu","Sreeleela",null],
+["Magadheera",2009,"S. S. Rajamouli","Ram Charan","Kajal Aggarwal","Dev Gill"],
+["Rangasthalam",2018,"Sukumar","Ram Charan","Samantha","Jagapathi Babu"],
+["Dhruva",2016,"Surender Reddy","Ram Charan","Rakul Preet Singh","Arvind Swamy"],
+["Vinaya Vidheya Rama",2019,"Boyapati Srinu","Ram Charan","Kiara Advani","Vivek Oberoi"],
+["Game Changer",2025,"S. Shankar","Ram Charan","Kiara Advani","S. J. Suryah"],
+["Orange",2010,"Bhaskar","Ram Charan","Genelia",null],
+["RRR",2022,"S. S. Rajamouli","N. T. Rama Rao Jr. & Ram Charan","Alia Bhatt","Ray Stevenson"],
+["Baahubali: The Beginning",2015,"S. S. Rajamouli","Prabhas","Tamannaah","Rana Daggubati"],
+["Baahubali 2: The Conclusion",2017,"S. S. Rajamouli","Prabhas","Anushka Shetty","Rana Daggubati"],
+["Chatrapathi",2005,"S. S. Rajamouli","Prabhas","Shriya Saran","Pradeep Rawat"],
+["Mirchi",2013,"Koratala Siva","Prabhas","Anushka Shetty","Sampath Raj"],
+["Varsham",2004,"Sobhan","Prabhas","Trisha","Gopichand"],
+["Munna",2007,"Vamshi Paidipally","Prabhas","Ileana D'Cruz","Prakash Raj"],
+["Ek Niranjan",2009,"Puri Jagannadh","Prabhas","Kangana Ranaut","Sonu Sood"],
+["Kalki 2898 AD",2024,"Nag Ashwin","Prabhas","Deepika Padukone","Kamal Haasan"],
+["Darling",2010,"A. Karunakaran","Prabhas","Kajal Aggarwal",null],
+["Mr. Perfect",2011,"Dasaradh","Prabhas","Kajal Aggarwal",null],
+["Radhe Shyam",2022,"Radha Krishna Kumar","Prabhas","Pooja Hegde",null],
+["Yamadonga",2007,"S. S. Rajamouli","N. T. Rama Rao Jr.","Priyamani","Mohan Babu"],
+["Temper",2015,"Puri Jagannadh","N. T. Rama Rao Jr.","Kajal Aggarwal","Prakash Raj"],
+["Nannaku Prematho",2016,"Sukumar","N. T. Rama Rao Jr.","Rakul Preet Singh","Jagapathi Babu"],
+["Janatha Garage",2016,"Koratala Siva","N. T. Rama Rao Jr.","Samantha","Sachin Khedekar"],
+["Aravinda Sametha Veera Raghava",2018,"Trivikram Srinivas","N. T. Rama Rao Jr.","Pooja Hegde","Jagapathi Babu"],
+["Devara: Part 1",2024,"Koratala Siva","N. T. Rama Rao Jr.","Janhvi Kapoor","Saif Ali Khan"],
+["Brindavanam",2010,"Vamshi Paidipally","N. T. Rama Rao Jr.","Kajal Aggarwal",null],
+["Pushpa: The Rise",2021,"Sukumar","Allu Arjun","Rashmika Mandanna","Fahadh Faasil"],
+["Ala Vaikunthapurramuloo",2020,"Trivikram Srinivas","Allu Arjun","Pooja Hegde","Samuthirakani"],
+["Julayi",2012,"Trivikram Srinivas","Allu Arjun","Ileana D'Cruz","Sonu Sood"],
+["S/O Satyamurthy",2015,"Trivikram Srinivas","Allu Arjun","Samantha","Upendra"],
+["Race Gurram",2014,"Surender Reddy","Allu Arjun","Shruti Haasan","Ravi Kishan"],
+["Sarrainodu",2016,"Boyapati Srinu","Allu Arjun","Rakul Preet Singh","Aadhi Pinisetty"],
+["DJ: Duvvada Jagannadham",2017,"Harish Shankar","Allu Arjun","Pooja Hegde","Rao Ramesh"],
+["Arya",2004,"Sukumar","Allu Arjun","Anuradha Mehta",null],
+["Arya 2",2009,"Sukumar","Allu Arjun","Kajal Aggarwal",null],
+["Parugu",2008,"Bhaskar","Allu Arjun","Sheela",null],
+["Jalsa",2008,"Trivikram Srinivas","Pawan Kalyan","Ileana D'Cruz","Mukesh Rishi"],
+["Gabbar Singh",2012,"Harish Shankar","Pawan Kalyan","Shruti Haasan","Abhimanyu Singh"],
+["Bheemla Nayak",2022,"Saagar K. Chandra","Pawan Kalyan","Nithya Menen","Rana Daggubati"],
+["They Call Him OG",2025,"Sujeeth","Pawan Kalyan","Priyanka Arul Mohan","Emraan Hashmi"],
+["Attarintiki Daredi",2013,"Trivikram Srinivas","Pawan Kalyan","Samantha",null],
+["Kushi",2001,"S. J. Suryah","Pawan Kalyan","Bhumika Chawla",null],
+["Tholi Prema",1998,"A. Karunakaran","Pawan Kalyan","Keerthi Reddy",null],
+["Badri",2000,"Puri Jagannadh","Pawan Kalyan","Ameesha Patel",null],
+["Vikramarkudu",2006,"S. S. Rajamouli","Ravi Teja","Anushka Shetty","Vineet Kumar"],
+["Mirapakay",2011,"Harish Shankar","Ravi Teja","Richa Gangopadhyay","Prakash Raj"],
+["Krack",2021,"Gopichand Malineni","Ravi Teja","Shruti Haasan","Samuthirakani"],
+["Kick",2009,"Surender Reddy","Ravi Teja","Ileana D'Cruz",null],
+["Idiot",2002,"Puri Jagannadh","Ravi Teja","Rakshita",null],
+["Venky",2004,"Srinu Vaitla","Ravi Teja","Sneha",null],
+["Indra",2002,"B. Gopal","Chiranjeevi","Sonali Bendre","Mukesh Rishi"],
+["Tagore",2003,"V. V. Vinayak","Chiranjeevi","Shriya Saran","Prakash Raj"],
+["Khaidi No. 150",2017,"V. V. Vinayak","Chiranjeevi","Kajal Aggarwal","Tarun Arora"],
+["Waltair Veerayya",2023,"Bobby Kolli","Chiranjeevi","Shruti Haasan","Prakash Raj"],
+["Jagadeka Veerudu Athiloka Sundari",1990,"K. Raghavendra Rao","Chiranjeevi","Sridevi","Amrish Puri"],
+["Gang Leader",1991,"Vijaya Bapineedu","Chiranjeevi","Vijayashanti","Rao Gopal Rao"],
+["Gharana Mogudu",1992,"K. Raghavendra Rao","Chiranjeevi","Nagma",null],
+["Shankar Dada M.B.B.S.",2004,"Jayanth C. Paranjee","Chiranjeevi","Sonali Bendre",null],
+["Stalin",2006,"A. R. Murugadoss","Chiranjeevi","Trisha",null],
+["Samarasimha Reddy",1999,"B. Gopal","Nandamuri Balakrishna","Simran","Jayaprakash Reddy"],
+["Aditya 369",1991,"Singeetham Srinivasa Rao","Nandamuri Balakrishna","Mohini","Amrish Puri"],
+["Legend",2014,"Boyapati Srinu","Nandamuri Balakrishna","Sonal Chauhan","Jagapathi Babu"],
+["Akhanda",2021,"Boyapati Srinu","Nandamuri Balakrishna","Pragya Jaiswal","Srikanth"],
+["Veera Simha Reddy",2023,"Gopichand Malineni","Nandamuri Balakrishna","Shruti Haasan","Duniya Vijay"],
+["Bhagavanth Kesari",2023,"Anil Ravipudi","Nandamuri Balakrishna","Kajal Aggarwal","Arjun Rampal"],
+["Daaku Maharaaj",2025,"Bobby Kolli","Nandamuri Balakrishna","Shraddha Srinath","Bobby Deol"],
+["Shiva",1989,"Ram Gopal Varma","Nagarjuna","Amala","Raghuvaran"],
+["Geethanjali",1989,"Mani Ratnam","Nagarjuna","Girija Shettar",null],
+["Ninne Pelladata",1996,"Krishna Vamsi","Nagarjuna","Tabu",null],
+["Manmadhudu",2002,"K. Vijaya Bhaskar","Nagarjuna","Sonali Bendre",null],
+["Soggade Chinni Nayana",2016,"Kalyan Krishna","Nagarjuna","Ramya Krishnan",null],
+["Kshana Kshanam",1991,"Ram Gopal Varma","Venkatesh","Sridevi","Paresh Rawal"],
+["Nuvvu Naaku Nachav",2001,"K. Vijaya Bhaskar","Venkatesh","Aarthi Agarwal",null],
+["Malliswari",2004,"K. Vijaya Bhaskar","Venkatesh","Katrina Kaif",null],
+["Aadavari Matalaku Ardhalu Verule",2007,"Selvaraghavan","Venkatesh","Trisha",null],
+["Sankranthiki Vasthunam",2025,"Anil Ravipudi","Venkatesh","Aishwarya Rajesh",null],
+["Eega",2012,"S. S. Rajamouli","Nani","Samantha","Sudeep"],
+["Dasara",2023,"Srikanth Odela","Nani","Keerthy Suresh","Shine Tom Chacko"],
+["Saripodhaa Sanivaaram",2024,"Vivek Athreya","Nani","Priyanka Arul Mohan","S. J. Suryah"],
+["Gang Leader",2019,"Vikram Kumar","Nani","Priyanka Arul Mohan","Kartikeya Gummakonda"],
+["Jersey",2019,"Gowtam Tinnanuri","Nani","Shraddha Srinath",null],
+["Bhale Bhale Magadivoy",2015,"Maruthi","Nani","Lavanya Tripathi",null],
+["Hi Nanna",2023,"Shouryuv","Nani","Mrunal Thakur",null],
+["Ninnu Kori",2017,"Shiva Nirvana","Nani","Nivetha Thomas",null],
+["Sye",2004,"S. S. Rajamouli","Nithiin","Genelia","Pradeep Rawat"],
+["Jayam",2002,"Teja","Nithiin","Sadha","Gopichand"],
+["Dil",2003,"V. V. Vinayak","Nithiin","Neha","Prakash Raj"],
+["Bheeshma",2020,"Venky Kudumula","Nithiin","Rashmika Mandanna","Jisshu Sengupta"],
+["A Aa",2016,"Trivikram Srinivas","Nithiin","Samantha",null],
+["Maryada Ramanna",2010,"S. S. Rajamouli","Sunil","Saloni","Nagineedu"],
+["Uppena",2021,"Buchi Babu Sana","Panja Vaisshnav Tej","Krithi Shetty","Vijay Sethupathi"],
+["HanuMan",2024,"Prasanth Varma","Teja Sajja","Amritha Aiyer","Vinay Rai"],
+["Mirai",2025,"Karthik Gattamneni","Teja Sajja","Ritika Nayak","Manoj Manchu"],
+["Custody",2023,"Venkat Prabhu","Naga Chaitanya","Krithi Shetty","Arvind Swamy"],
+["Kuberaa",2025,"Sekhar Kammula","Dhanush","Rashmika Mandanna","Jim Sarbh"],
+["Love Story",2021,"Sekhar Kammula","Naga Chaitanya","Sai Pallavi",null],
+["Majili",2019,"Shiva Nirvana","Naga Chaitanya","Samantha",null],
+["Ye Maaya Chesave",2010,"Gautham Vasudev Menon","Naga Chaitanya","Samantha",null],
+["Thandel",2025,"Chandoo Mondeti","Naga Chaitanya","Sai Pallavi",null],
+["Fidaa",2017,"Sekhar Kammula","Varun Tej","Sai Pallavi",null],
+["Arjun Reddy",2017,"Sandeep Reddy Vanga","Vijay Deverakonda","Shalini Pandey",null],
+["Geetha Govindam",2018,"Parasuram","Vijay Deverakonda","Rashmika Mandanna",null],
+["Pelli Choopulu",2016,"Tharun Bhascker","Vijay Deverakonda","Ritu Varma",null],
+["Dear Comrade",2019,"Bharat Kamma","Vijay Deverakonda","Rashmika Mandanna",null],
+["Bommarillu",2006,"Bhaskar","Siddharth","Genelia",null],
+["Nuvvostanante Nenoddantana",2005,"Prabhu Deva","Siddharth","Trisha",null],
+["Sita Ramam",2022,"Hanu Raghavapudi","Dulquer Salmaan","Mrunal Thakur",null],
+["Lucky Baskhar",2024,"Venky Atluri","Dulquer Salmaan","Meenakshi Chaudhary",null],
+["Nuvve Kavali",2000,"K. Vijaya Bhaskar","Tarun","Richa Pallod",null],
+["Nuvve Nuvve",2002,"Trivikram Srinivas","Tarun","Shriya Saran",null],
+["Manasantha Nuvve",2001,"V. N. Aditya","Uday Kiran","Reema Sen",null],
+["Chitram",2000,"Teja","Uday Kiran","Reema Sen",null],
+["Ready",2008,"Srinu Vaitla","Ram Pothineni","Genelia",null],
+["Tillu Square",2024,"Mallik Ram","Siddhu Jonnalagadda","Anupama Parameswaran",null],
+["DJ Tillu",2022,"Vimal Krishna","Siddhu Jonnalagadda","Neha Shetty",null],
+["Virupaksha",2023,"Karthik Varma Dandu","Sai Dharam Tej","Samyuktha",null],
+["Sir",2023,"Venky Atluri","Dhanush","Samyuktha",null],
+["Colour Photo",2020,"Sandeep Raj","Suhas","Chandini Chowdary","Sunil"],
+["Taxiwaala",2018,"Rahul Sankrityan","Vijay Deverakonda","Priyanka Jawalkar",null],
+["Rang De",2021,"Venky Atluri","Nithiin","Keerthy Suresh",null],
+["Kalyan Ram's Bimbisara",0,"","","",null]
+].filter(r=>r[1]>0);
+const LD=LD_RAW.map(([t,y,d,hero,heroine,villain])=>({t,y,d,l:hero,hero,heroine,villain}));
+
 const BROKERS=["wss://broker.hivemq.com:8884/mqtt","wss://broker.emqx.io:8084/mqtt","wss://test.mosquitto.org:8081"];
 const MODES={
- ladder:{n:"Clue Ladder",s:"5 clues, hardest first. Guess early for up to 5 points.",tm:0},
+ ladder:{n:"Clue Ladder",s:"Director, then heroine, villain, and the hero last. Guess early: +5, +4, +3…",tm:0},
  emoji:{n:"Emoji Rush",s:"Everyone sees the emojis. 30 seconds. 2 points, 1 after a hint.",tm:30},
  vowel:{n:"Vowel Vanish",s:"Title with the vowels removed. 30 seconds. 2 points, 1 after a hint.",tm:30},
  scramble:{n:"Scrambled",s:"Letters of each word jumbled up. 45 seconds. 2 points, 1 after a hint.",tm:45},
  blanks:{n:"Fill the Blanks",s:"First letter and a few others shown, the rest are blanks. 45 seconds.",tm:45},
  trans:{n:"Title Translator",s:"English titles in Telugu, Telugu titles in English. Name the film!",tm:45},
  song:{n:"Song → Movie",s:"A hit song name. Which film is it from? 45 seconds.",tm:45},
- cast:{n:"Cast Combo",s:"A set of actors from one film. Name the film. 45 seconds.",tm:45},
+ cast:{n:"Cast Combo",s:"Actors revealed one by one, hero last. Guess early: +5, +4, +3…",tm:0},
  charades:{n:"Dumb Charades",s:"One player acts on video call, only they see the title. 90 seconds.",tm:90},
  geoWorld:{n:"World Wonders",s:"Famous places across the globe. Up to 1000 points by distance.",tm:45,g:"w"},
  geoIndia:{n:"Incredible India",s:"Monuments and places across India.",tm:45,g:"in"},
@@ -1556,19 +1698,19 @@ function render(){if(!role)return;board();
   guessBox.hidden=true;hostPanel();return}
  if(isGeo(v.mode))return renderGeo(v);
  const sh=v.show||{},m=MODES[v.mode];let body="";
- if(v.mode==="ladder"){const labels=["Story","Year & music","Emoji","Director","Lead cast"];
-  body=`<ul class="clues">${labels.map((l,i)=>i<sh.clues.length?`<li class="${i>=lastClue?"new":""}"><small>${l}</small>${i===2?`<span style="font-size:30px">${esc(sh.clues[i])}</span>`:esc(sh.clues[i])}</li>`:`<li class="locked"><small>Clue ${i+1}</small>Locked</li>`).join('')}</ul>`;lastClue=sh.clues.length}
+ if(v.mode==="ladder"){
+  body=`<ul class="clues">${Array.from({length:sh.n||4},(_,i)=>i<sh.clues.length?`<li class="${i>=lastClue?"new":""}"><small>${esc(sh.clues[i][0])} · worth +${5-i}</small><b style="font-size:20px">${esc(sh.clues[i][1])}</b></li>`:`<li class="locked"><small>Clue ${i+1}</small>Locked</li>`).join('')}</ul>`;lastClue=sh.clues.length}
  else if(v.mode==="emoji")body=`<div class="emoji">${esc(sh.e)}</div>`;
  else if(v.mode==="vowel")body=`<div class="big" style="letter-spacing:3px">${esc(sh.nv)}</div>`;
  else if(v.mode==="trans")body=`<p class="hint" style="margin-top:8px">${sh.k==="te"?"This English title, said in Telugu:":"This Telugu title, said in English:"}</p><div class="big" style="font-family:'Anek Telugu','Rozha One',serif;font-weight:800">${esc(sh.c)}</div>${sh.s?`<p class="hint" style="font-style:italic">${esc(sh.s)}</p>`:""}`;
  else if(v.mode==="song")body=`<p class="hint" style="margin-top:8px">Which film is this song from?</p><div class="big">🎵 ${esc(sh.song)}</div>`;
- else if(v.mode==="cast")body=`<p class="hint" style="margin-top:8px">These actors were together in…</p><div class="castw">${(sh.cast||[]).map(n=>`<span class="cc">${esc(n)}</span>`).join("")}</div>`;
+ else if(v.mode==="cast"){body=`<p class="hint" style="margin-top:8px">These actors were together in… (hero comes last)</p><ul class="clues">${Array.from({length:sh.n||1},(_,i)=>i<sh.cast.length?`<li class="${i>=lastClue?"new":""}"><small>Actor ${i+1}${i===sh.n-1?" · the hero":""} · worth +${Math.max(1,5-i)}</small><b style="font-size:20px">${esc(sh.cast[i])}</b></li>`:`<li class="locked"><small>Actor ${i+1}</small>Locked</li>`).join('')}</ul>`;lastClue=sh.cast.length}
  else if(v.mode==="scramble")body=`<div class="tiles">${esc(sh.sc).split("   ").map(w=>`<span class="tw">${[...w].map(c=>`<b>${c}</b>`).join("")}</span>`).join("")}</div>`;
  else if(v.mode==="blanks")body=`<div class="tiles">${esc(sh.bl).split("     ").map(w=>`<span class="tw">${w.split(" ").map(c=>`<b class="${c==="_"?"bk":""}">${c==="_"?"":c}</b>`).join("")}</span>`).join("")}</div>`;
  else{const actor=v.players.find(p=>p.id===v.actor);
   body=isActor&&secret&&secret.round===v.round&&v.phase==="clue"?`<p class="hint">You're acting! Only you can see this. No talking 🤐</p><div class="ans">${esc(secret.t)}<small>${secret.words} word${secret.words>1?"s":""} · ${secret.y}</small></div>`:`<div class="big">🎭 ${esc(actor?actor.name:"Someone")} is acting</div><p class="hint">Watch them on the video call and type your guess.</p>`}
- const info=v.mode==="ladder"||isActor?"":`<p class="hint">${sh.words} word${sh.words>1?"s":""}${sh.hint?" · "+esc(sh.hint):""}</p>`;
- const pts=v.mode==="ladder"?`Worth ${6-sh.clues.length}`:v.mode==="charades"?"Worth 1":`Worth ${sh.hint?1:2}`;
+ const info=v.mode==="ladder"||v.mode==="cast"||isActor?"":`<p class="hint">${sh.words} word${sh.words>1?"s":""}${sh.hint?" · "+esc(sh.hint):""}</p>`;
+ const pts=v.mode==="ladder"?`Worth ${6-sh.clues.length}`:v.mode==="cast"?`Worth ${Math.max(1,6-sh.cast.length)}`:v.mode==="charades"?"Worth 1":`Worth ${sh.hint?1:2}`;
  const timer=v.phase==="clue"&&endLocal?`<div class="secs" id="tn"></div>`:v.locked&&v.phase==="clue"?`<div class="secs">Time's up!</div>`:"";
  const ans=v.phase==="reveal"&&v.answer?`<div class="ans">${esc(v.answer.t)}<small>${[v.answer.y,v.answer.l,v.answer.d?"dir. "+v.answer.d:""].filter(Boolean).map(esc).join(" · ")}</small></div>`:"";
  const all=v.phase==="reveal"&&v.answers&&role!=="host"?`<label class="l">Everyone's answers</label><ul class="plist">${v.answers.map(a=>`<li><span><b>${esc(a.name)}${a.id===me.id?" (you)":""}</b>: ${a.text?esc(a.text):"<i>no answer</i>"}</span>${a.c==="yes"?'<span class="tag">✓ correct</span>':a.c==="close"?'<span class="tag c">close</span>':""}</li>`).join('')}</ul>`:"";
@@ -1673,19 +1815,22 @@ function addPlayer(id,name){const ex=H.players[id];if(ex&&ex.name===name)return;
 function hostGuess(id,text){if(H.phase!=="clue"||H.locked||!H.players[id]||(H.mode==="charades"&&id===H.actor)||!text)return;
  if(isGeo(H.mode)){if(typeof text!=="object")return;H.guesses[id]={lat:text.lat,lng:text.lng};return publish()}
  if(typeof text!=="string")return;H.guesses[id]={text,clue:H.clue,hint:H.hint};publish()}
-const SETS={trans:TT,song:SG,cast:CC};const SRC=()=>SETS[H.mode]||M;const movie=()=>SRC()[H.cur];
-function pts(id){const g=H.guesses[id];if(H.mode==="ladder")return g?Math.max(1,6-g.clue):1;if(H.mode==="charades")return 1;return g&&g.hint?1:2}
+const SETS={trans:TT,song:SG,cast:CC,ladder:LD};const SRC=()=>SETS[H.mode]||M;const movie=()=>SRC()[H.cur];
+function ladderClues(m){return [["Director",m.d],["Heroine",m.heroine],m.villain?["Villain",m.villain]:null,["Hero",m.hero]].filter(Boolean)}
+function clueTotal(){const m=movie();return H.mode==="ladder"?ladderClues(m).length:H.mode==="cast"?m.cast.length:0}
+function pts(id){const g=H.guesses[id];if(H.mode==="ladder"||H.mode==="cast")return g?Math.max(1,6-g.clue):1;if(H.mode==="charades")return 1;return g&&g.hint?1:2}
 function publish(){if(!H)return;ls.set("tgn_host_"+H.code,H);
  if(isGeo(H.mode))return publishGeo();
  const m=H.cur>=0?movie():null,players=H.order.filter(id=>H.players[id]).map(id=>({id,name:H.players[id].name,score:H.players[id].score}));
  let show=null;
- if(m){if(H.mode==="ladder"){const c=[m.p,m.y+(m.m?" · music by "+m.m:""),m.e,m.d,m.l];show={clues:c.slice(0,H.clue)}}
+ if(m){if(H.mode==="ladder"){const c=ladderClues(m);show={clues:c.slice(0,H.clue),n:c.length}}
+  else if(H.mode==="cast"){const c=m.cast.slice().reverse();show={cast:c.slice(0,H.clue),n:c.length,words:words(m.t),hint:""}}
   else{show={words:words(m.t),hint:H.hint?m.y+" · "+m.l:""};if(H.mode==="emoji")show.e=m.e;if(H.mode==="vowel")show.nv=novowel(m.t);
    if(H.mode==="scramble"){show.sc=scrambleTitle(m.t,H.seed);if(H.hint)show.hint="Starts with "+m.t[0].toUpperCase()+" · "+m.y+" · "+m.l}
    if(H.mode==="blanks"){show.bl=blankTitle(m.t,H.seed,H.hint)}
    if(H.mode==="trans"){show.c=m.c;show.s=m.s;show.k=m.k}
    if(H.mode==="song"){show.song=m.song;show.hint=H.hint?m.y+(m.l?" · "+m.l:""):""}
-   if(H.mode==="cast"){const hs=x=>[...x].reduce((a,c)=>(a*31+c.charCodeAt(0)+H.seed)%100003,7);show.cast=m.cast.slice().sort((a,b)=>hs(a)-hs(b));show.hint=H.hint?m.y+" · dir. "+m.d:""}}}
+}}
  const s={v:2,phase:H.phase,mode:H.mode,round:H.round,total:H.total,players,show,locked:H.locked,actor:H.actor,
   left:H.phase==="clue"&&H.endAt&&!H.locked?Math.max(0,Math.round((H.endAt-Date.now())/1000)):null,
   guessed:Object.keys(H.guesses),answers:H.phase==="reveal"&&m?players.filter(p=>!(H.mode==="charades"&&p.id===H.actor)).map(p=>{const g=H.guesses[p.id];return{id:p.id,name:p.name,text:g?g.text:"",c:g?check(g.text,m.t):"",pts:pts(p.id)}}):null,answer:H.phase==="reveal"&&m?{t:m.t,y:m.y,l:m.l,d:m.d}:null,lastAward:H.lastAward};
@@ -1703,7 +1848,7 @@ function startGame(){if(isGeo(H.mode))return startGeo();if(SETS[H.mode])return s
  H.deck=mixDeck(fresh);H.total=Math.min(H.films,fresh.length);H.round=0;H.lastAward=null;
  for(const id in H.players)H.players[id].score=0;nextFilm()}
 function startSet(){const arr=SRC(),[,a,b]=ERAS[H.era],uk="tgn_used_"+H.mode;
- let pool=arr.map((m,i)=>i).filter(i=>arr[i].y>=a&&arr[i].y<=b);if(pool.length<3)pool=arr.map((m,i)=>i);
+ let pool=arr.map((m,i)=>i).filter(i=>arr[i].y>=a&&arr[i].y<=b&&(H.mode!=="cast"||arr[i].cast.length>=3));if(pool.length<3)pool=arr.map((m,i)=>i);
  const key=m=>(m.song||m.c||"")+"|"+m.t;let used=new Set(ls.get(uk,[]));let fresh=pool.filter(i=>!used.has(key(arr[i])));
  if(fresh.length<H.films){fresh=pool;ls.set(uk,[])}
  H.deck=mixDeck(fresh,arr);H.total=Math.min(H.films,fresh.length);H.round=0;H.lastAward=null;
@@ -1768,8 +1913,8 @@ function hostPanel(){if(role!=="host"||!H){hostBox.innerHTML="";return}
  const m=movie();
  if(H.phase==="clue"){const n=Object.keys(H.guesses).length;
   hostBox.innerHTML=`<section class="ticket"><h2>Host controls</h2><div class="row">
-  ${H.mode==="ladder"&&H.clue<5?`<button class="btn" id="more">Next clue</button>`:""}
-  ${["emoji","vowel","scramble","blanks","trans","song","cast"].includes(H.mode)&&!H.hint?`<button class="btn ghost" id="hi">Give hint</button>`:""}
+  ${(H.mode==="ladder"||H.mode==="cast")&&H.clue<clueTotal()?`<button class="btn" id="more">${H.mode==="cast"?"Next actor":"Next clue"}</button>`:""}
+  ${["emoji","vowel","scramble","blanks","trans","song"].includes(H.mode)&&!H.hint?`<button class="btn ghost" id="hi">Give hint</button>`:""}
   <button class="btn ok" id="rv">Show answer</button></div>
   ${(()=>{const el=ids.filter(id=>!(H.mode==="charades"&&id===H.actor)),done=el.filter(id=>H.guesses[id]),wait=el.filter(id=>!H.guesses[id]);
    return `<p class="hint" style="text-align:left;margin-top:12px"><b>${done.length} of ${el.length} answered.</b>${done.length===el.length&&el.length?" Everyone's in, show the answer!":""}</p><ul class="plist">${done.map(id=>`<li><span>${esc(H.players[id].name)}</span><span class="tag">answered</span></li>`).join('')}${wait.map(id=>`<li><span>${esc(H.players[id].name)}</span><span class="tag c">waiting…</span></li>`).join('')}</ul>`})()}
